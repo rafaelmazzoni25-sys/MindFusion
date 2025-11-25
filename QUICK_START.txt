@@ -1,0 +1,60 @@
+⚡ INÍCIO RÁPIDO - 3 PASSOS SIMPLES
+=========================================
+
+Você já tem:
+✅ MySQL rodando
+✅ Banco de dados criado
+✅ PHP 8.2.12 instalado
+✅ Node.js v24.6.0 instalado
+
+=========================================
+PASSO 1: VERIFICAR BANCO DE DADOS
+=========================================
+
+Execute no PowerShell:
+  .\verify-db.ps1
+
+Isso vai:
+- Verificar se o schema foi importado (17 tabelas)
+- Atualizar automaticamente o database.php
+
+Se o script disser que faltam tabelas, execute:
+  .\import-schema.bat
+
+=========================================
+PASSO 2: INICIAR APLICAÇÃO
+=========================================
+
+Execute:
+  .\start-all.bat
+
+Isso abrirá 2 terminais:
+- Backend PHP: http://localhost:8000
+- Frontend React: http://localhost:5173
+
+=========================================
+PASSO 3: TESTAR
+=========================================
+
+Abra no navegador:
+  http://localhost:5173
+
+Faça login ou crie uma conta!
+
+=========================================
+TROUBLESHOOTING RÁPIDO
+=========================================
+
+❌ "mysql: command not found"
+   → Adicione MySQL ao PATH do Windows
+   → Ou use MySQL Workbench para importar o schema
+
+❌ Frontend não conecta ao backend
+   → Verifique se o backend está rodando em http://localhost:8000
+
+❌ Erro de senha do MySQL
+   → Edite manualmente: backend\api\config\database.php (linha 14)
+
+=========================================
+
+Precisa de ajuda? Veja START_LOCAL.md para o guia completo!

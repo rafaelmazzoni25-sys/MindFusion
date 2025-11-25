@@ -1,0 +1,5 @@
+{
+  "name": "Mind-Task Fusion",
+  "description": "A hybrid mind map and task management application for visualizing ideas and organizing projects. It features a dynamic mind map, a Trello-style task board, drag-and-drop functionality, and seamless conversion of ideas into actionable tasks.",
+  "requestFramePermissions": []
+}
