@@ -253,10 +253,21 @@ function App() {
           console.log(`[App] Auto-loading workspace ${currentWorkspaceId} data...`);
           const data = await api.workspaces.loadData(currentWorkspaceId);
 
+          // Deduplicate data by ID to prevent duplicate keys in React
+          const uniqueNodes = Array.from(
+            new Map((data.nodes || []).map(node => [node.id, node])).values()
+          );
+          const uniqueConnections = Array.from(
+            new Map((data.connections || []).map(conn => [conn.id, conn])).values()
+          );
+          const uniqueTexts = Array.from(
+            new Map((data.texts || []).map(text => [text.id, text])).values()
+          );
+
           // Load all workspace data
-          setNodes(data.nodes || []);
-          setConnections(data.connections || []);
-          setTexts(data.texts || []);
+          setNodes(uniqueNodes);
+          setConnections(uniqueConnections);
+          setTexts(uniqueTexts);
           setColumns(data.columns || []);
           setBugReports(data.bugs || []);
           setUsers(data.users || []);
@@ -628,37 +639,47 @@ function App() {
       dependencies: [],
     };
 
-    // Optimistic update
-    setColumns(cols => {
-      const newCols = [...cols];
-      if (newCols.length > 0) {
-        newCols[0].cards.push(newCard);
-      } else {
-        newCols.push({ id: crypto.randomUUID(), title: 'To Do', cards: [newCard] });
-      }
-      return newCols;
-    });
-
-    setNodes(n => n.map(n => n.id === nodeId ? { ...n, linkedTaskId: newCard.id } : n));
-    setCurrentView(View.TaskBoard);
-    setHighlightedTaskId(newCard.id);
-
-    // Save to backend
     try {
-      const firstColumn = columns.length > 0 ? columns[0] : null;
-      if (firstColumn) {
-        await api.tasks.createTask(newCard, firstColumn.id);
-        await api.nodes.update(nodeId, { linkedTaskId: newCard.id });
-      } else {
+      // First, ensure we have a column
+      let targetColumn = columns.length > 0 ? columns[0] : null;
+
+      if (!targetColumn) {
         // Create default column first
         const defaultColumn = { id: crypto.randomUUID(), title: 'To Do', cards: [] };
         await api.columns.create(defaultColumn);
-        await api.tasks.createTask(newCard, defaultColumn.id);
-        await api.nodes.update(nodeId, { linkedTaskId: newCard.id });
+        targetColumn = defaultColumn;
+        // Update columns state
+        setColumns([defaultColumn]);
       }
+
+      // Create the task in the backend
+      await api.tasks.createTask(newCard, targetColumn.id);
+
+      // Update node with linkedTaskId
+      await api.nodes.update(nodeId, { linkedTaskId: newCard.id });
+
+      // Only update local state AFTER successful backend operations
+      setColumns(cols => {
+        const newCols = [...cols];
+        const targetColIndex = newCols.findIndex(c => c.id === targetColumn!.id);
+        if (targetColIndex >= 0) {
+          newCols[targetColIndex] = {
+            ...newCols[targetColIndex],
+            cards: [...newCols[targetColIndex].cards, newCard]
+          };
+        }
+        return newCols;
+      });
+
+      setNodes(n => n.map(n => n.id === nodeId ? { ...n, linkedTaskId: newCard.id } : n));
+
+      // Navigate to the task board and highlight the new task
+      setCurrentView(View.TaskBoard);
+      setHighlightedTaskId(newCard.id);
+
     } catch (error) {
       console.error('Failed to convert node to task:', error);
-      // Note: Rollback would be complex here, user can manually delete if needed
+      alert('Falha ao converter nó em tarefa. Por favor, tente novamente.');
     }
   }, [nodes, columns]);
 

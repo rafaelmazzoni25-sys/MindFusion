@@ -53,7 +53,7 @@ interface MindMapProps {
 
 const FONT_FAMILIES = ['Inter', 'Arial', 'Georgia', 'Courier New', 'Verdana'];
 
-const SHAPE_COMPONENTS: Record<NodeShape, (props: {node: MindMapNode}) => React.ReactElement> = {
+const SHAPE_COMPONENTS: Record<NodeShape, (props: { node: MindMapNode }) => React.ReactElement> = {
     [NodeShape.Rectangle]: ({ node }) => <rect x="0" y="0" width={node.width} height={node.height} fill={node.backgroundColor || '#f1f5f9'} stroke={node.borderColor || '#64748b'} strokeWidth="2" />,
     [NodeShape.Rounded]: ({ node }) => <rect x="0" y="0" width={node.width} height={node.height} rx="15" fill={node.backgroundColor || '#f0fdf4'} stroke={node.borderColor || '#4ade80'} strokeWidth="2" />,
     [NodeShape.Ellipse]: ({ node }) => <ellipse cx={node.width / 2} cy={node.height / 2} rx={node.width / 2} ry={node.height / 2} fill={node.backgroundColor || '#e0f2fe'} stroke={node.borderColor || '#38bdf8'} strokeWidth="2" />,
@@ -73,7 +73,7 @@ const SHAPE_COMPONENTS: Record<NodeShape, (props: {node: MindMapNode}) => React.
         const middleHeight = height - (2 * ry);
 
         if (middleHeight < 0) { // Handle case where height is too small
-            return <ellipse cx={rx} cy={height/2} rx={rx} ry={height/2} fill={node.backgroundColor || '#f3e8ff'} stroke={node.borderColor || '#9333ea'} strokeWidth="2" />;
+            return <ellipse cx={rx} cy={height / 2} rx={rx} ry={height / 2} fill={node.backgroundColor || '#f3e8ff'} stroke={node.borderColor || '#9333ea'} strokeWidth="2" />;
         }
 
         return (
@@ -92,23 +92,23 @@ const SHAPE_COMPONENTS: Record<NodeShape, (props: {node: MindMapNode}) => React.
                     <rect x="2" y="2" width={node.width - 4} height={node.height - 4} rx="4" />
                 </clipPath>
             </defs>
-            <rect 
-                x="0" 
-                y="0" 
-                width={node.width} 
-                height={node.height} 
-                fill={node.backgroundColor || '#e5e7eb'} 
-                stroke={node.borderColor || '#9ca3af'} 
-                strokeWidth="2" 
-                rx="6" 
+            <rect
+                x="0"
+                y="0"
+                width={node.width}
+                height={node.height}
+                fill={node.backgroundColor || '#e5e7eb'}
+                stroke={node.borderColor || '#9ca3af'}
+                strokeWidth="2"
+                rx="6"
             />
             {node.imageUrl ? (
-                <image 
-                    href={node.imageUrl} 
-                    x="2" 
-                    y="2" 
-                    width={node.width - 4} 
-                    height={node.height - 4} 
+                <image
+                    href={node.imageUrl}
+                    x="2"
+                    y="2"
+                    width={node.width - 4}
+                    height={node.height - 4}
                     preserveAspectRatio="xMidYMid slice"
                     clipPath={`url(#clip-${node.id})`}
                 />
@@ -136,7 +136,7 @@ const NodeComponent: React.FC<{
     onStartResize: (e: React.MouseEvent, nodeId: string) => void;
 }> = ({ node, isSelected, isEditing, onMouseDown, onDoubleClick, onUpdateText, onFinishEditing, onStartConnection, onFinishConnection, onStartResize }) => {
     const patternId = `pattern-${node.id}`;
-    
+
     const usePatternFill = node.imageUrl && node.shape !== NodeShape.Image;
 
     const nodeForShape = useMemo(() => ({
@@ -153,7 +153,7 @@ const NodeComponent: React.FC<{
             textAreaRef.current.select();
         }
     }, [isEditing]);
-    
+
     const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         onUpdateText(node.id, e.target.value);
     };
@@ -169,8 +169,8 @@ const NodeComponent: React.FC<{
     };
 
     return (
-        <g 
-            transform={`translate(${node.position.x}, ${node.position.y})`} 
+        <g
+            transform={`translate(${node.position.x}, ${node.position.y})`}
             onMouseDown={(e) => onMouseDown(e, node.id)}
             onMouseUp={() => onFinishConnection(node.id)}
             onDoubleClick={() => onDoubleClick(node.id)}
@@ -186,7 +186,7 @@ const NodeComponent: React.FC<{
 
             <Shape node={nodeForShape} />
             {isEditing ? (
-                 <foreignObject x="5" y="5" width={node.width - 10} height={node.height - 10}>
+                <foreignObject x="5" y="5" width={node.width - 10} height={node.height - 10}>
                     <textarea
                         ref={textAreaRef}
                         value={node.text}
@@ -208,7 +208,7 @@ const NodeComponent: React.FC<{
             ) : (
                 <>
                     {(node.imageUrl || node.shape === NodeShape.Image) && (
-                         <rect
+                        <rect
                             x="2"
                             y={node.height - 28}
                             width={node.width - 4}
@@ -226,9 +226,9 @@ const NodeComponent: React.FC<{
 
             {isSelected && (
                 <>
-                    <rect x="-2" y="-2" width={node.width + 4} height={node.height + 4} fill="none" stroke="#4f46e5" strokeWidth="2" strokeDasharray="4 4" style={{pointerEvents: 'none'}} />
-                    <rect 
-                        x={node.width - 6} 
+                    <rect x="-2" y="-2" width={node.width + 4} height={node.height + 4} fill="none" stroke="#4f46e5" strokeWidth="2" strokeDasharray="4 4" style={{ pointerEvents: 'none' }} />
+                    <rect
+                        x={node.width - 6}
                         y={node.height - 6}
                         width="12"
                         height="12"
@@ -292,7 +292,7 @@ const TextComponent: React.FC<{
         }
         onFinishEditing();
     };
-    
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (e.key === 'Escape') {
             (e.target as HTMLDivElement).blur();
@@ -300,23 +300,23 @@ const TextComponent: React.FC<{
     };
 
     return (
-        <g 
-            transform={`translate(${textItem.position.x}, ${textItem.position.y})`} 
+        <g
+            transform={`translate(${textItem.position.x}, ${textItem.position.y})`}
             onMouseDown={(e) => onMouseDown(e, textItem.id)}
             onDoubleClick={() => onDoubleClick(textItem.id)}
             className="cursor-pointer group"
         >
             {isSelected && !isEditing && (
-                <rect 
-                    x="-2" 
-                    y="-2" 
-                    width={textItem.width + 4} 
-                    height={(textRef.current?.offsetHeight || 20) + 4} 
-                    fill="none" 
-                    stroke="#4f46e5" 
-                    strokeWidth="1.5" 
-                    strokeDasharray="4 4" 
-                    style={{pointerEvents: 'none'}} 
+                <rect
+                    x="-2"
+                    y="-2"
+                    width={textItem.width + 4}
+                    height={(textRef.current?.offsetHeight || 20) + 4}
+                    fill="none"
+                    stroke="#4f46e5"
+                    strokeWidth="1.5"
+                    strokeDasharray="4 4"
+                    style={{ pointerEvents: 'none' }}
                 />
             )}
             <foreignObject x="0" y="0" width={textItem.width} height={9999}>
@@ -335,7 +335,7 @@ const TextComponent: React.FC<{
                         padding: '2px',
                         lineHeight: 1.4
                     }}
-                    // IMPORTANT: dangerouslySetInnerHTML is removed to prevent React from overwriting user input
+                // IMPORTANT: dangerouslySetInnerHTML is removed to prevent React from overwriting user input
                 />
             </foreignObject>
         </g>
@@ -343,34 +343,34 @@ const TextComponent: React.FC<{
 };
 
 const MindMap: React.FC<MindMapProps> = ({
-  nodes,
-  connections,
-  texts,
-  addNode,
-  addText,
-  addNodeAndConnect,
-  deleteNode,
-  deleteText,
-  updateNodeText,
-  updateTextProperties,
-  updateNodePosition,
-  updateNodeDimensions,
-  updateNodeProperties,
-  updateNodeImage,
-  startConnection,
-  finishConnection,
-  cancelConnection,
-  connectingNodeId,
-  convertNodeToTask,
-  navigateToTask,
-  nodeTemplates,
-  addTemplate,
-  updateTemplate,
-  deleteTemplate,
-  selectedNodeId,
-  setSelectedNodeId,
-  selectedTextId,
-  setSelectedTextId,
+    nodes,
+    connections,
+    texts,
+    addNode,
+    addText,
+    addNodeAndConnect,
+    deleteNode,
+    deleteText,
+    updateNodeText,
+    updateTextProperties,
+    updateNodePosition,
+    updateNodeDimensions,
+    updateNodeProperties,
+    updateNodeImage,
+    startConnection,
+    finishConnection,
+    cancelConnection,
+    connectingNodeId,
+    convertNodeToTask,
+    navigateToTask,
+    nodeTemplates,
+    addTemplate,
+    updateTemplate,
+    deleteTemplate,
+    selectedNodeId,
+    setSelectedNodeId,
+    selectedTextId,
+    setSelectedTextId,
 }) => {
     const [view, setView] = useState({ x: 0, y: 0, zoom: 1 });
     const [draggingState, setDraggingState] = useState<{ type: 'pan' | 'node' | 'text'; start: Point; nodeId?: string; textId?: string; offset: Point } | null>(null);
@@ -404,9 +404,9 @@ const MindMap: React.FC<MindMapProps> = ({
         if (e.button === 1 || (e.button === 0 && e.altKey)) { // Middle mouse or alt+click for panning
             setDraggingState({ type: 'pan', start: { x: e.clientX, y: e.clientY }, offset: { x: 0, y: 0 } });
         } else if (e.target === e.currentTarget && e.button === 0) {
-             setSelectedNodeId(null);
-             setSelectedTextId(null);
-             if (connectingNodeId) cancelConnection();
+            setSelectedNodeId(null);
+            setSelectedTextId(null);
+            if (connectingNodeId) cancelConnection();
         }
     }, [connectingNodeId, cancelConnection, setSelectedNodeId, setSelectedTextId]);
 
@@ -431,7 +431,7 @@ const MindMap: React.FC<MindMapProps> = ({
             setSelectedNodeId(null);
         }
     }, [screenToWorld, texts, setSelectedNodeId, setSelectedTextId]);
-    
+
     const handleResizeStart = useCallback((e: React.MouseEvent, nodeId: string) => {
         e.stopPropagation();
         const node = nodes.find(n => n.id === nodeId);
@@ -452,7 +452,7 @@ const MindMap: React.FC<MindMapProps> = ({
         if (resizingState) {
             const deltaX = (currentPos.x - resizingState.start.x) / view.zoom;
             const deltaY = (currentPos.y - resizingState.start.y) / view.zoom;
-            
+
             const newWidth = Math.max(50, resizingState.initialWidth + deltaX);
             const newHeight = Math.max(50, resizingState.initialHeight + deltaY);
 
@@ -490,23 +490,7 @@ const MindMap: React.FC<MindMapProps> = ({
             addNodeAndConnect(connectingNodeId, mousePosition);
         }
     }, [resizingState, draggingState, connectingNodeId, mousePosition, addNodeAndConnect]);
-    
-    const handleWheel = useCallback((e: React.WheelEvent) => {
-        e.preventDefault();
-        const scale = 1 - e.deltaY * 0.001;
-        const newZoom = Math.max(0.2, Math.min(3, view.zoom * scale));
-        
-        if (!containerRef.current) return;
-        const rect = containerRef.current.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-        
-        const newX = mouseX - (mouseX - view.x) * (newZoom / view.zoom);
-        const newY = mouseY - (mouseY - view.y) * (newZoom / view.zoom);
-        
-        setView({ x: newX, y: newY, zoom: newZoom });
-    }, [view.zoom, view.x, view.y]);
-    
+
     const nodesMap = useMemo(() => new Map(nodes.map(node => [node.id, node])), [nodes]);
     const textsMap = useMemo(() => new Map(texts.map(text => [text.id, text])), [texts]);
 
@@ -536,8 +520,32 @@ const MindMap: React.FC<MindMapProps> = ({
         e.target.value = ''; // Reset file input
     };
 
+    // Use native event listener with passive: false to allow preventDefault
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        const wheelHandler = (e: WheelEvent) => {
+            e.preventDefault();
+            const scale = 1 - e.deltaY * 0.001;
+            const newZoom = Math.max(0.2, Math.min(3, view.zoom * scale));
+
+            const rect = container.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            const newX = mouseX - (mouseX - view.x) * (newZoom / view.zoom);
+            const newY = mouseY - (mouseY - view.y) * (newZoom / view.zoom);
+
+            setView({ x: newX, y: newY, zoom: newZoom });
+        };
+
+        container.addEventListener('wheel', wheelHandler, { passive: false });
+        return () => container.removeEventListener('wheel', wheelHandler);
+    }, [view.zoom, view.x, view.y]);
+
     return (
-        <div className="w-full h-full bg-gray-100 relative overflow-hidden" ref={containerRef} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp} onWheel={handleWheel}>
+        <div className="w-full h-full bg-gray-100 relative overflow-hidden" ref={containerRef} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
             <svg className="w-full h-full absolute top-0 left-0 pointer-events-none">
                 <defs>
                     <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
@@ -562,7 +570,7 @@ const MindMap: React.FC<MindMapProps> = ({
                     })()}
                 </g>
             </svg>
-            <div style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.zoom})`, transformOrigin: 'top left', width: '1px', height: '1px'}}>
+            <div style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.zoom})`, transformOrigin: 'top left', width: '1px', height: '1px' }}>
                 <svg className="overflow-visible">
                     {nodes.map(node => (
                         <NodeComponent
@@ -593,7 +601,7 @@ const MindMap: React.FC<MindMapProps> = ({
                     ))}
                 </svg>
             </div>
-            
+
             <div className="absolute top-4 left-4 flex gap-2">
                 <button onClick={() => addNode()} className="p-2 bg-white rounded-md shadow-md hover:bg-gray-100 transition-colors"><PlusIcon className="w-6 h-6 text-gray-700" /></button>
                 <button onClick={handleAddText} title="Add text" className="p-2 bg-white rounded-md shadow-md hover:bg-gray-100 transition-colors"><TextIcon className="w-6 h-6 text-gray-700" /></button>
@@ -607,18 +615,18 @@ const MindMap: React.FC<MindMapProps> = ({
                             <h4 className="font-semibold text-sm mb-2 text-gray-700">Actions</h4>
                             <div className="space-y-1">
                                 <button onClick={() => setEditingNodeId(selectedNodeId)} className="w-full flex items-center gap-2 p-1.5 rounded-md hover:bg-gray-100 text-gray-700">
-                                <PencilIcon className="w-5 h-5"/> Edit Text
+                                    <PencilIcon className="w-5 h-5" /> Edit Text
                                 </button>
                                 <button onClick={() => startConnection(selectedNodeId)} className="w-full flex items-center gap-2 p-1.5 rounded-md hover:bg-gray-100 text-gray-700">
-                                <LinkIcon className="w-5 h-5"/> Create Link
+                                    <LinkIcon className="w-5 h-5" /> Create Link
                                 </button>
                                 {selectedNode.linkedTaskId ? (
                                     <button onClick={() => navigateToTask(selectedNode.linkedTaskId!)} className="w-full flex items-center gap-2 p-1.5 rounded-md hover:bg-gray-100 text-indigo-600 font-semibold">
-                                    <TrelloIcon className="w-5 h-5"/> View Task
+                                        <TrelloIcon className="w-5 h-5" /> View Task
                                     </button>
                                 ) : (
                                     <button onClick={() => convertNodeToTask(selectedNodeId)} className="w-full flex items-center gap-2 p-1.5 rounded-md hover:bg-gray-100 text-gray-700">
-                                    <TrelloIcon className="w-5 h-5"/> Convert to Task
+                                        <TrelloIcon className="w-5 h-5" /> Convert to Task
                                     </button>
                                 )}
                             </div>
@@ -643,13 +651,13 @@ const MindMap: React.FC<MindMapProps> = ({
                                                 [NodeShape.Image]: ImageIcon,
                                             }[shape];
                                             return (
-                                                <button 
+                                                <button
                                                     key={shape}
-                                                    onClick={() => updateNodeProperties(selectedNodeId, { shape })} 
+                                                    onClick={() => updateNodeProperties(selectedNodeId, { shape })}
                                                     className={`p-1.5 rounded ${selectedNode.shape === shape ? 'bg-indigo-500 text-white' : 'hover:bg-gray-200 text-gray-600'}`}
                                                     title={`Shape: ${shape}`}
                                                 >
-                                                    <ShapeIcon className="w-5 h-5"/>
+                                                    <ShapeIcon className="w-5 h-5" />
                                                 </button>
                                             );
                                         })}
@@ -687,14 +695,14 @@ const MindMap: React.FC<MindMapProps> = ({
                         </div>
 
                         <div className="border-t my-2" />
-                        
+
                         <div>
                             <h4 className="font-semibold text-sm mb-2 text-gray-700 flex items-center gap-2"><ImageIcon className="w-5 h-5" /> Image</h4>
                             {selectedNode.imageUrl ? (
                                 <div className="relative group">
                                     <img src={selectedNode.imageUrl} alt={selectedNode.text} className="w-full rounded-md border" />
-                                    <button 
-                                        onClick={() => updateNodeImage(selectedNodeId, null)} 
+                                    <button
+                                        onClick={() => updateNodeImage(selectedNodeId, null)}
                                         className="absolute top-1 right-1 p-1 bg-black/50 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity"
                                     >
                                         <XIcon className="w-4 h-4" />
@@ -702,29 +710,29 @@ const MindMap: React.FC<MindMapProps> = ({
                                 </div>
                             ) : (
                                 <label className="w-full flex items-center justify-center gap-2 p-2 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium cursor-pointer">
-                                    <PlusIcon className="w-5 h-5"/> Upload Image
+                                    <PlusIcon className="w-5 h-5" /> Upload Image
                                     <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                                 </label>
                             )}
                         </div>
 
-                         <div className="border-t my-2" />
+                        <div className="border-t my-2" />
 
-                         <button onClick={() => deleteNode(selectedNodeId)} className="w-full flex items-center justify-center gap-2 p-2 rounded-md bg-red-50 hover:bg-red-100 text-red-600 font-semibold">
-                           <TrashIcon className="w-5 h-5"/> Delete Node
-                         </button>
+                        <button onClick={() => deleteNode(selectedNodeId)} className="w-full flex items-center justify-center gap-2 p-2 rounded-md bg-red-50 hover:bg-red-100 text-red-600 font-semibold">
+                            <TrashIcon className="w-5 h-5" /> Delete Node
+                        </button>
                     </div>
                 </div>
             )}
 
             {selectedText && (
-                 <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-3 w-[calc(100%-2rem)] max-w-sm sm:w-64 animate-fade-in-scale-up max-h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar">
+                <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-3 w-[calc(100%-2rem)] max-w-sm sm:w-64 animate-fade-in-scale-up max-h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar">
                     <h3 className="font-bold mb-3 text-lg text-gray-900">Text Properties</h3>
-                     <div className="space-y-3">
-                         <div>
+                    <div className="space-y-3">
+                        <div>
                             <h4 className="font-semibold text-sm mb-2 text-gray-700">Actions</h4>
-                             <button onClick={() => setEditingTextId(selectedTextId)} className="w-full flex items-center gap-2 p-1.5 rounded-md hover:bg-gray-100 text-gray-700">
-                                <PencilIcon className="w-5 h-5"/> Edit Text
+                            <button onClick={() => setEditingTextId(selectedTextId)} className="w-full flex items-center gap-2 p-1.5 rounded-md hover:bg-gray-100 text-gray-700">
+                                <PencilIcon className="w-5 h-5" /> Edit Text
                             </button>
                         </div>
                         <div className="border-t my-2" />
@@ -733,9 +741,9 @@ const MindMap: React.FC<MindMapProps> = ({
                             <div className="space-y-3">
                                 <div>
                                     <label htmlFor={`font-family-${selectedTextId}`} className="text-xs font-medium text-gray-600">Font</label>
-                                    <select 
+                                    <select
                                         id={`font-family-${selectedTextId}`}
-                                        value={selectedText.fontFamily} 
+                                        value={selectedText.fontFamily}
                                         onChange={(e) => updateTextProperties(selectedTextId, { fontFamily: e.target.value })}
                                         className="mt-1 w-full p-1.5 border rounded-md text-sm focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 bg-white text-gray-900"
                                     >
@@ -754,7 +762,7 @@ const MindMap: React.FC<MindMapProps> = ({
                                         />
                                     </div>
                                     <div className="w-1/2">
-                                         <label htmlFor={`color-${selectedTextId}`} className="text-xs font-medium text-gray-600">Color</label>
+                                        <label htmlFor={`color-${selectedTextId}`} className="text-xs font-medium text-gray-600">Color</label>
                                         <div className="relative mt-1 h-8 w-full rounded border border-gray-300" style={{ backgroundColor: selectedText.color }}>
                                             <input
                                                 id={`color-${selectedTextId}`}
@@ -766,7 +774,7 @@ const MindMap: React.FC<MindMapProps> = ({
                                         </div>
                                     </div>
                                 </div>
-                                 <div>
+                                <div>
                                     <label htmlFor={`width-${selectedTextId}`} className="text-xs font-medium text-gray-600">Width</label>
                                     <input
                                         id={`width-${selectedTextId}`}
@@ -780,9 +788,9 @@ const MindMap: React.FC<MindMapProps> = ({
                         </div>
                         <div className="border-t my-2" />
                         <button onClick={() => deleteText(selectedTextId)} className="w-full flex items-center justify-center gap-2 p-2 rounded-md bg-red-50 hover:bg-red-100 text-red-600 font-semibold">
-                           <TrashIcon className="w-5 h-5"/> Delete Text
-                         </button>
-                     </div>
+                            <TrashIcon className="w-5 h-5" /> Delete Text
+                        </button>
+                    </div>
                 </div>
             )}
         </div>
