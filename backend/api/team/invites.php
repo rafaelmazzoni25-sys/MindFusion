@@ -120,8 +120,9 @@ if ($method === 'POST') {
     }
 }
 
-// GET: List pending invites
+// GET: List pending invites sent by this workspace (for management)
 elseif ($method === 'GET') {
+    // Return invites sent by this workspace for management purposes
     $stmt = $db->prepare("
         SELECT 
             wi.id,

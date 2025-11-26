@@ -60,6 +60,14 @@ if ($method === 'POST') {
         exit();
     }
     
+    // Validate: Cannot invite yourself
+    $userEmail = $userData['email'] ?? null;
+    if ($userEmail && strtolower($invitedEmail) === strtolower($userEmail)) {
+        http_response_code(400);
+        echo json_encode(["success" => false, "message" => "You cannot invite yourself"]);
+        exit();
+    }
+    
     // Check permission to manage members
     PermissionMiddleware::requirePermission($db, $workspaceId, $userId, 'manage_members');
     

@@ -2,7 +2,7 @@
  * API Service - Client para comunicação com backend PHP
  */
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 // Store JWT token
 let authToken: string | null = localStorage.getItem('auth_token');
@@ -325,12 +325,12 @@ export const teamAPI = {
   },
 
   getInvites: async (): Promise<TeamInvite[]> => {
-    const response = await request<{ success: boolean; invites: TeamInvite[] }>('workspaces/invites.php');
+    const response = await request<{ success: boolean; invites: TeamInvite[] }>('team/invites.php');
     return response.invites;
   },
 
   cancelInvite: async (inviteId: number): Promise<void> => {
-    await request(`workspaces/invites.php?id=${inviteId}`, {
+    await request(`team/invites.php?id=${inviteId}`, {
       method: 'DELETE',
     });
   },
