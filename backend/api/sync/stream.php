@@ -23,24 +23,34 @@ require_once '../helpers/EventLogger.php';
 $database = new Database();
 $db = $database->getConnection();
 
-// Get authenticated user
-$userData = AuthMiddleware::authenticate();
-if (!$userData) {
-    echo "event: error\n";
-    echo "data: {\"message\": \"Unauthorized\"}\n\n";
-    flush();
-    exit();
-}
-
-$userId = $userData['user_id'] ?? null;
+// Get parameters
 $workspaceId = $_GET['workspace_id'] ?? null;
+$tempToken = $_GET['token'] ?? null;
 
-if (!$workspaceId) {
+if (!$workspaceId || !$tempToken) {
     echo "event: error\n";
-    echo "data: {\"message\": \"Workspace ID required\"}\n\n";
+    echo "data: {\"message\": \"Workspace ID and token required\"}\n\n";
     flush();
     exit();
 }
+
+// Validate temporary token
+$stmt = $db->prepare("
+    SELECT user_id, workspace_id, expires_at 
+    FROM sse_tokens 
+    WHERE token = ? AND workspace_id = ? AND expires_at > NOW()
+");
+$stmt->execute([$tempToken, $workspaceId]);
+$tokenData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$tokenData) {
+    echo "event: error\n";
+    echo "data: {\"message\": \"Invalid or expired token\"}\n\n";
+    flush();
+    exit();
+}
+
+$userId = $tokenData['user_id'];
 
 // Verify access to workspace
 try {

@@ -325,12 +325,13 @@ export const teamAPI = {
   },
 
   getInvites: async (): Promise<TeamInvite[]> => {
-    const response = await request<{ success: boolean; invites: TeamInvite[] }>('team/invites.php');
+    const workspaceId = localStorage.getItem('current_workspace_id');
+    const response = await request<{ success: boolean; invites: TeamInvite[] }>(`workspaces/invites.php?workspace_id=${workspaceId}`);
     return response.invites;
   },
 
   cancelInvite: async (inviteId: number): Promise<void> => {
-    await request(`team/invites.php?id=${inviteId}`, {
+    await request(`workspaces/invites.php?id=${inviteId}`, {
       method: 'DELETE',
     });
   },

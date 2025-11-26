@@ -105,6 +105,7 @@ export interface WorkspaceInvite {
   role: UserRole;
   createdAt: string;
   status: 'pending' | 'accepted' | 'rejected';
+  token?: string; // Token needed to accept the invite
 }
 
 export interface UserProfile {

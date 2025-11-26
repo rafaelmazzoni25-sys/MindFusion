@@ -32,7 +32,7 @@ export class SyncService {
         this._connect();
     }
 
-    private _connect() {
+    private async _connect() {
         if (!this.workspaceId) return;
 
         const token = getAuthToken();
@@ -42,14 +42,40 @@ export class SyncService {
         }
 
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
-        const url = `${apiUrl}/sync/stream.php?workspace_id=${this.workspaceId}&lastEventId=${this.lastEventId}`;
 
-        // Close existing connection
-        this.disconnect();
+        try {
+            // Request temporary SSE token
+            const response = await fetch(`${apiUrl}/sync/token.php`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ workspace_id: this.workspaceId })
+            });
 
-        // Create new EventSource with auth header (via URL param since EventSource doesn't support headers)
-        // Note: In production, consider using a session-based auth or temporary token in URL
-        this.eventSource = new EventSource(url);
+            if (!response.ok) {
+                throw new Error('Failed to get SSE token');
+            }
+
+            const data = await response.json();
+            if (!data.success || !data.token) {
+                throw new Error('Invalid SSE token response');
+            }
+
+            // Use temporary token in URL (secure - expires in 5 minutes)
+            const url = `${apiUrl}/sync/stream.php?workspace_id=${this.workspaceId}&token=${data.token}&lastEventId=${this.lastEventId}`;
+
+            // Close existing connection
+            this.disconnect();
+
+            // Create new EventSource with temporary token
+            this.eventSource = new EventSource(url);
+        } catch (error) {
+            console.error('[Sync] Failed to connect:', error);
+            this.onConnectionChange?.(false);
+            return;
+        }
 
         this.eventSource.onopen = () => {
             console.log(`[Sync] Connected to workspace ${this.workspaceId}`);

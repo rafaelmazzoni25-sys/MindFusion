@@ -47,9 +47,29 @@ if ($method === 'POST') {
     $invitedEmail = $data->email ?? null;
     $role = $data->role ?? 'Editor';
     
-    if (!$workspaceId || !$invitedEmail) {
+    // If workspace_id not provided, auto-detect from user's workspaces
+    if (!$workspaceId) {
+        $workspaceStmt = $db->prepare("
+            SELECT w.id FROM workspaces w
+            LEFT JOIN workspace_users wu ON w.id = wu.workspace_id AND wu.user_id = ?
+            WHERE w.user_id = ? OR wu.user_id = ?
+            ORDER BY w.created_at DESC
+            LIMIT 1
+        ");
+        $workspaceStmt->execute([$userId, $userId, $userId]);
+        $workspace = $workspaceStmt->fetch(PDO::FETCH_ASSOC);
+        $workspaceId = $workspace['id'] ?? null;
+        
+        if (!$workspaceId) {
+            http_response_code(404);
+            echo json_encode(["success" => false, "message" => "No workspace found"]);
+            exit();
+        }
+    }
+    
+    if (!$invitedEmail) {
         http_response_code(400);
-        echo json_encode(["success" => false, "message" => "Workspace ID and email are required"]);
+        echo json_encode(["success" => false, "message" => "Email is required"]);
         exit();
     }
     
@@ -149,7 +169,7 @@ elseif ($method === 'GET') {
     $workspaceId = $_GET['workspace_id'] ?? null;
     
     if ($workspaceId) {
-        // List invites for a workspace (requires manage_members permission)
+        // List invites for a specific workspace (requires manage_members permission)
         PermissionMiddleware::requirePermission($db, $workspaceId, $userId, 'manage_members');
         
         $stmt = $db->prepare("
@@ -160,10 +180,10 @@ elseif ($method === 'GET') {
                 wi.status,
                 wi.created_at,
                 wi.expires_at,
-                u.name as invited_by_name
+                u.name as invited_by
             FROM workspace_invites wi
             JOIN users u ON wi.invited_by_user_id = u.id
-            WHERE wi.workspace_id = ?
+            WHERE wi.workspace_id = ? AND wi.status = 'pending'
             ORDER BY wi.created_at DESC
         ");
         $stmt->execute([$workspaceId]);
@@ -174,7 +194,7 @@ elseif ($method === 'GET') {
             "invites" => $invites
         ]);
     } else {
-        // List invites for current user's email
+        // No workspace_id: List invites for current user's email (received invites)
         $userEmail = $userData['email'] ?? null;
         if (!$userEmail) {
             http_response_code(400);

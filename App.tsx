@@ -357,14 +357,20 @@ function App() {
   // --- Invites & Profile Logic ---
   const handleAcceptInvite = useCallback(async (inviteId: string) => {
     try {
-      await api.invites.accept(inviteId);
+      // Find the invite to get its token
+      const invite = invites.find(inv => inv.id === inviteId);
+      if (!invite || !invite.token) {
+        throw new Error('Invite token not found');
+      }
+
+      await api.invites.accept(invite.token);
       setInvites(prev => prev.filter(inv => inv.id !== inviteId));
       alert('Convite aceito com sucesso!');
     } catch (error) {
       console.error('Failed to accept invite:', error);
       alert('Falha ao aceitar convite. Tente novamente.');
     }
-  }, []);
+  }, [invites]);
 
   const handleRejectInvite = useCallback(async (inviteId: string) => {
     try {
@@ -439,6 +445,7 @@ function App() {
             role: inv.role,
             createdAt: inv.created_at,
             status: inv.status,
+            token: inv.token || '', // Add token for accepting invite
           }));
           setInvites(transformedInvites);
         } catch (error) {
