@@ -496,6 +496,53 @@ export const permissionsAPI = {
 };
 
 // ============================================
+// User Profile API
+// ============================================
+
+import type { UserProfile } from '../types';
+
+export const profileAPI = {
+  get: async (): Promise<UserProfile> => {
+    const response = await request<{ success: boolean; profile: UserProfile }>('user/profile.php');
+    return response.profile;
+  },
+
+  update: async (updates: Partial<UserProfile>): Promise<UserProfile> => {
+    const response = await request<{ success: boolean; profile: UserProfile }>('user/profile.php', {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+    return response.profile;
+  },
+
+  changePassword: async (oldPassword: string, newPassword: string): Promise<void> => {
+    await request('user/password.php', {
+      method: 'PUT',
+      body: JSON.stringify({ old_password: oldPassword, new_password: newPassword }),
+    });
+  },
+
+  uploadAvatar: async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    const token = getAuthToken();
+    const response = await fetch(`${API_URL}/user/avatar.php`, {
+      method: 'POST',
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+      body: formData,
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Upload failed');
+    }
+
+    return data.avatar_url;
+  },
+};
+
+// ============================================
 // Activities API
 // ============================================
 
@@ -567,6 +614,7 @@ export const api = {
   invites: invitesAPI,
   permissions: permissionsAPI,
   activities: activitiesAPI,
+  profile: profileAPI,
 };
 
 export default api;

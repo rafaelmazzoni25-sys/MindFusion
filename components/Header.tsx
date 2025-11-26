@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View } from '../types';
+import { View, WorkspaceInvite } from '../types';
 import { MindMapIcon } from './icons/MindMapIcon';
 import { TrelloIcon } from './icons/TrelloIcon';
 import { TimelineIcon } from './icons/TimelineIcon';
@@ -10,6 +10,8 @@ import { DownloadIcon } from './icons/DownloadIcon';
 import { SearchIcon } from './icons/SearchIcon';
 import { CalendarIcon } from './icons/CalendarIcon';
 import { UsersIcon } from './icons/UsersIcon';
+import { UserIcon } from './icons/UserIcon';
+import InvitesDropdown from './InvitesDropdown';
 
 interface DiscordUser {
   id: string;
@@ -29,6 +31,10 @@ interface HeaderProps {
   onOpenSearch: () => void;
   onOpenWorkspaceSelector?: () => void;
   currentWorkspaceName?: string;
+  invites?: WorkspaceInvite[];
+  onAcceptInvite?: (inviteId: string) => void;
+  onRejectInvite?: (inviteId: string) => void;
+  onOpenProfile?: () => void;
 }
 
 const UserMenu: React.FC<{
@@ -38,7 +44,8 @@ const UserMenu: React.FC<{
   notificationPermission: NotificationPermission,
   onExport: () => void,
   onImport: (file: File) => void,
-}> = ({ user, onLogout, onRequestNotifications, notificationPermission, onExport, onImport }) => {
+  onOpenProfile?: () => void,
+}> = ({ user, onLogout, onRequestNotifications, notificationPermission, onExport, onImport, onOpenProfile }) => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -95,7 +102,7 @@ const UserMenu: React.FC<{
       <button onClick={() => setIsOpen(!isOpen)} className="flex items-center gap-2 p-1 rounded-full hover:bg-gray-200 transition-colors">
         <img src={user.avatar} alt={user.username} className="w-8 h-8 rounded-full" />
         <span className="font-semibold text-gray-700 hidden sm:block">{user.username}</span>
-        <svg className={`w-5 h-5 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className={`w - 5 h - 5 text - gray - 500 transition - transform ${isOpen ? 'rotate-180' : ''} `} fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
@@ -107,12 +114,18 @@ const UserMenu: React.FC<{
             <p className="text-xs text-gray-600">Logged in via Discord</p>
           </div>
           <div className="p-1">
+            {onOpenProfile && (
+              <button onClick={() => { onOpenProfile(); setIsOpen(false); }} className="w-full text-left flex items-center gap-3 px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100">
+                <UserIcon className="w-5 h-5" />
+                Meu Perfil
+              </button>
+            )}
             <button
               onClick={onRequestNotifications}
               disabled={notifButton.disabled}
               className="w-full text-left flex items-center gap-3 px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <BellIcon className={`w-5 h-5 ${notifButton.className}`} />
+              <BellIcon className={`w - 5 h - 5 ${notifButton.className} `} />
               <span>{notifButton.title}</span>
             </button>
           </div>
@@ -148,7 +161,7 @@ const UserMenu: React.FC<{
 };
 
 
-const Header: React.FC<HeaderProps> = ({ currentView, onViewChange, onRequestNotifications, notificationPermission, user, onLogout, onExport, onImport, onOpenSearch, onOpenWorkspaceSelector, currentWorkspaceName }) => {
+const Header: React.FC<HeaderProps> = ({ currentView, onViewChange, onRequestNotifications, notificationPermission, user, onLogout, onExport, onImport, onOpenSearch, onOpenWorkspaceSelector, currentWorkspaceName, invites, onAcceptInvite, onRejectInvite, onOpenProfile }) => {
   const baseButtonClass = "relative flex items-center justify-center gap-2 px-3 md:px-4 py-2 rounded-md font-semibold transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 z-10";
   const activeButtonClass = "text-white";
   const inactiveButtonClass = "text-gray-700 hover:text-gray-900";
@@ -169,7 +182,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange, onRequestNot
         const buttonRect = currentButton.getBoundingClientRect();
 
         setSliderStyle({
-          width: `${buttonRect.width}px`,
+          width: `${buttonRect.width} px`,
           transform: `translateX(${buttonRect.left - navRect.left}px)`,
         });
       }
@@ -237,7 +250,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange, onRequestNot
           <button
             ref={el => { buttonsRef.current[0] = el; }}
             onClick={() => onViewChange(View.MindMap)}
-            className={`${baseButtonClass} ${currentView === View.MindMap ? activeButtonClass : inactiveButtonClass}`}
+            className={`${baseButtonClass} ${currentView === View.MindMap ? activeButtonClass : inactiveButtonClass} `}
           >
             <MindMapIcon className="w-5 h-5" />
             <span className="hidden md:inline">Mind Map</span>
@@ -245,7 +258,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange, onRequestNot
           <button
             ref={el => { buttonsRef.current[1] = el; }}
             onClick={() => onViewChange(View.TaskBoard)}
-            className={`${baseButtonClass} ${currentView === View.TaskBoard ? activeButtonClass : inactiveButtonClass}`}
+            className={`${baseButtonClass} ${currentView === View.TaskBoard ? activeButtonClass : inactiveButtonClass} `}
           >
             <TrelloIcon className="w-5 h-5" />
             <span className="hidden md:inline">Task Board</span>
@@ -253,7 +266,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange, onRequestNot
           <button
             ref={el => { buttonsRef.current[2] = el; }}
             onClick={() => onViewChange(View.Timeline)}
-            className={`${baseButtonClass} ${currentView === View.Timeline ? activeButtonClass : inactiveButtonClass}`}
+            className={`${baseButtonClass} ${currentView === View.Timeline ? activeButtonClass : inactiveButtonClass} `}
           >
             <TimelineIcon className="w-5 h-5" />
             <span className="hidden md:inline">Gantt</span>
@@ -261,7 +274,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange, onRequestNot
           <button
             ref={el => { buttonsRef.current[3] = el; }}
             onClick={() => onViewChange(View.BugTracker)}
-            className={`${baseButtonClass} ${currentView === View.BugTracker ? activeButtonClass : inactiveButtonClass}`}
+            className={`${baseButtonClass} ${currentView === View.BugTracker ? activeButtonClass : inactiveButtonClass} `}
           >
             <BugIcon className="w-5 h-5" />
             <span className="hidden md:inline">Bugs</span>
@@ -269,7 +282,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange, onRequestNot
           <button
             ref={el => { buttonsRef.current[4] = el; }}
             onClick={() => onViewChange(View.Calendar)}
-            className={`${baseButtonClass} ${currentView === View.Calendar ? activeButtonClass : inactiveButtonClass}`}
+            className={`${baseButtonClass} ${currentView === View.Calendar ? activeButtonClass : inactiveButtonClass} `}
           >
             <CalendarIcon className="w-5 h-5" />
             <span className="hidden md:inline">Calendar</span>
@@ -277,12 +290,19 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange, onRequestNot
           <button
             ref={el => { buttonsRef.current[5] = el; }}
             onClick={() => onViewChange(View.Team)}
-            className={`${baseButtonClass} ${currentView === View.Team ? activeButtonClass : inactiveButtonClass}`}
+            className={`${baseButtonClass} ${currentView === View.Team ? activeButtonClass : inactiveButtonClass} `}
           >
             <UsersIcon className="w-5 h-5" />
             <span className="hidden md:inline">Team</span>
           </button>
         </nav>
+        {invites && onAcceptInvite && onRejectInvite && (
+          <InvitesDropdown
+            invites={invites}
+            onAcceptInvite={onAcceptInvite}
+            onRejectInvite={onRejectInvite}
+          />
+        )}
         {user && (
           <UserMenu
             user={user}
@@ -291,6 +311,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange, onRequestNot
             notificationPermission={notificationPermission}
             onExport={onExport}
             onImport={onImport}
+            onOpenProfile={onOpenProfile}
           />
         )}
       </div>

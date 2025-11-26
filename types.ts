@@ -94,6 +94,28 @@ export interface User {
   role?: UserRole;
 }
 
+export interface WorkspaceInvite {
+  id: string;
+  workspaceId: number;
+  workspaceName: string;
+  inviterId: string;
+  inviterName: string;
+  invitedEmail: string;
+  role: UserRole;
+  createdAt: string;
+  status: 'pending' | 'accepted' | 'rejected';
+}
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  role?: UserRole;
+  createdAt: string;
+  bio?: string;
+}
+
 export interface Attachment {
   id: string;
   name: string;

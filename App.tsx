@@ -1,7 +1,7 @@
 
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, MindMapNode, Connection, TaskColumn, TaskCard, Point, NodeTemplate, MindMapText, BugReport, Label, ProjectData, NodeShape, User } from './types';
+import { View, MindMapNode, Connection, TaskColumn, TaskCard, Point, NodeTemplate, MindMapText, BugReport, Label, ProjectData, NodeShape, User, WorkspaceInvite, UserProfile } from './types';
 import { INITIAL_NODES, INITIAL_CONNECTIONS, INITIAL_COLUMNS, INITIAL_TEMPLATES, DEFAULT_USERS, INITIAL_TEXTS, INITIAL_BUG_REPORTS } from './constants';
 import MindMap from './components/MindMap';
 import TaskBoard, { TaskDetailsModal } from './components/TaskBoard';
@@ -19,6 +19,7 @@ import TeamView from './components/TeamView';
 import { getAuthToken, api } from './services/api';
 import { WorkspaceSelector } from './components/WorkspaceSelector';
 import WorkspaceLoadingScreen from './components/WorkspaceLoadingScreen';
+import UserProfileModal from './components/UserProfileModal';
 import syncService from './services/sync';
 
 const CollaboratorCursors: React.FC<{ users: User[] }> = ({ users }) => {
@@ -112,6 +113,11 @@ function App() {
 
   // --- Permissions ---
   const { permissions, role, can, loading: permissionsLoading } = usePermissions(currentWorkspaceId);
+
+  // --- Invites and Profile State ---
+  const [invites, setInvites] = useState<any[]>([]);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [userProfile, setUserProfile] = useState<any | null>(null);
 
   // --- Real-time Sync ---
   const [syncConnected, setSyncConnected] = useState(false);
@@ -928,6 +934,101 @@ function App() {
 
   }, []);
 
+  // --- Invites and Profile Handlers ---
+  const handleAcceptInvite = useCallback(async (inviteId: string) => {
+    try {
+      // For now using string ID - API may need to convert to number
+      await api.invites.accept(inviteId);
+      // Remove from local invites list
+      setInvites(prev => prev.filter(inv => inv.id !== inviteId));
+      // Optionally reload workspaces list
+      alert('Convite aceito com sucesso!');
+    } catch (error) {
+      console.error('Failed to accept invite:', error);
+      alert('Falha ao aceitar convite. Tente novamente.');
+    }
+  }, []);
+
+  const handleRejectInvite = useCallback(async (inviteId: string) => {
+    try {
+      // For now using string ID - need to convert to number for cancel API
+      const numericId = parseInt(inviteId);
+      if (isNaN(numericId)) {
+        throw new Error('Invalid invite ID');
+      }
+      await api.invites.cancel(numericId);
+      // Remove from local invites list
+      setInvites(prev => prev.filter(inv => inv.id !== inviteId));
+    } catch (error) {
+      console.error('Failed to reject invite:', error);
+      alert('Falha ao recusar convite. Tente novamente.');
+    }
+  }, []);
+
+  const handleUpdateProfile = useCallback(async (updates: Partial<UserProfile>) => {
+    try {
+      const updatedProfile = await api.profile.update(updates);
+      setUserProfile(updatedProfile);
+      alert('Perfil atualizado com sucesso!');
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      throw error; // Re-throw so modal can handle it
+    }
+  }, []);
+
+  const handleChangePassword = useCallback(async (oldPassword: string, newPassword: string) => {
+    try {
+      await api.profile.changePassword(oldPassword, newPassword);
+    } catch (error) {
+      console.error('Failed to change password:', error);
+      throw error; // Re-throw so modal can handle it
+    }
+  }, []);
+
+  // Load user profile when logged in
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      if (isLoggedIn) {
+        try {
+          const profile = await api.profile.get();
+          setUserProfile(profile);
+        } catch (error) {
+          console.error('[App] Failed to load user profile:', error);
+        }
+      }
+    };
+
+    loadUserProfile();
+  }, [isLoggedIn]);
+
+  // Load invites when logged in
+  useEffect(() => {
+    const loadInvites = async () => {
+      if (isLoggedIn) {
+        try {
+          const userInvites = await api.invites.listMine();
+          // Transform invite format to match our type
+          const transformedInvites = userInvites.map(inv => ({
+            id: inv.id.toString(),
+            workspaceId: inv.workspace_id || 0,
+            workspaceName: inv.workspace_name || 'Unknown Workspace',
+            inviterId: inv.invited_by || '',
+            inviterName: inv.invited_by_name || 'Unknown',
+            invitedEmail: inv.invited_email,
+            role: inv.role,
+            createdAt: inv.created_at,
+            status: inv.status,
+          }));
+          setInvites(transformedInvites);
+        } catch (error) {
+          console.error('[App] Failed to load invites:', error);
+        }
+      }
+    };
+
+    loadInvites();
+  }, [isLoggedIn]);
+
 
   const allLabels = React.useMemo(() => {
     const labelMap = new Map<string, Label>();
@@ -980,6 +1081,10 @@ function App() {
         onOpenSearch={() => setIsSearchOpen(true)}
         onOpenWorkspaceSelector={() => setIsWorkspaceSelectorOpen(true)}
         currentWorkspaceName={currentWorkspaceName}
+        invites={invites}
+        onAcceptInvite={handleAcceptInvite}
+        onRejectInvite={handleRejectInvite}
+        onOpenProfile={() => setIsProfileModalOpen(true)}
       />
       <main className="flex-grow overflow-hidden">
         {currentView === View.MindMap && (
@@ -1098,6 +1203,15 @@ function App() {
         onSelectWorkspace={handleSelectWorkspace}
         currentWorkspaceId={currentWorkspaceId}
       />
+      {userProfile && (
+        <UserProfileModal
+          isOpen={isProfileModalOpen}
+          onClose={() => setIsProfileModalOpen(false)}
+          profile={userProfile}
+          onUpdateProfile={handleUpdateProfile}
+          onChangePassword={handleChangePassword}
+        />
+      )}
     </div>
   );
 }
