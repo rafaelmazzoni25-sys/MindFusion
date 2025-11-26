@@ -92,6 +92,7 @@ export interface User {
   initials: string;
   color?: string;
   role?: UserRole;
+  avatar?: string;
 }
 
 export interface WorkspaceInvite {

@@ -969,6 +969,13 @@ function App() {
     try {
       const updatedProfile = await api.profile.update(updates);
       setUserProfile(updatedProfile);
+      // Update main user state as well so Header updates immediately
+      setUser((prev: any) => ({
+        ...prev,
+        ...updatedProfile,
+        username: updatedProfile.name,
+        avatar: updatedProfile.avatar
+      }));
       alert('Perfil atualizado com sucesso!');
     } catch (error) {
       console.error('Failed to update profile:', error);
@@ -992,6 +999,13 @@ function App() {
         try {
           const profile = await api.profile.get();
           setUserProfile(profile);
+          // Sync profile data to user state
+          setUser((prev: any) => ({
+            ...prev,
+            ...profile,
+            username: profile.name,
+            avatar: profile.avatar
+          }));
         } catch (error) {
           console.error('[App] Failed to load user profile:', error);
         }

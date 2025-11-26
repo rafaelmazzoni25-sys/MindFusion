@@ -316,20 +316,21 @@ export interface TeamInvite {
 
 export const teamAPI = {
   sendInvite: async (email: string, role: string): Promise<TeamInvite> => {
-    const response = await request<{ success: boolean; invite: TeamInvite }>('team/invites.php', {
+    const workspaceId = localStorage.getItem('current_workspace_id');
+    const response = await request<{ success: boolean; invite: TeamInvite }>('workspaces/invites.php', {
       method: 'POST',
-      body: JSON.stringify({ email, role }),
+      body: JSON.stringify({ email, role, workspace_id: workspaceId }),
     });
     return response.invite;
   },
 
   getInvites: async (): Promise<TeamInvite[]> => {
-    const response = await request<{ success: boolean; invites: TeamInvite[] }>('team/invites.php');
+    const response = await request<{ success: boolean; invites: TeamInvite[] }>('workspaces/invites.php');
     return response.invites;
   },
 
   cancelInvite: async (inviteId: number): Promise<void> => {
-    await request(`team/invites.php?id=${inviteId}`, {
+    await request(`workspaces/invites.php?id=${inviteId}`, {
       method: 'DELETE',
     });
   },
@@ -527,7 +528,12 @@ export const profileAPI = {
     formData.append('avatar', file);
 
     const token = getAuthToken();
-    const response = await fetch(`${API_URL}/user/avatar.php`, {
+    const workspaceId = localStorage.getItem('current_workspace_id');
+    const url = workspaceId
+      ? `${API_URL}/user/avatar.php?workspace_id=${workspaceId}`
+      : `${API_URL}/user/avatar.php`;
+
+    const response = await fetch(url, {
       method: 'POST',
       headers: token ? { 'Authorization': `Bearer ${token}` } : {},
       body: formData,

@@ -53,7 +53,7 @@ if ($method === 'POST') {
     
     // Get invitation
     $stmt = $db->prepare("
-        SELECT id, workspace_id, invited_email, role, status, expires_at
+        SELECT id, workspace_id, email, role, status, expires_at
         FROM workspace_invites
         WHERE token = ?
     ");
@@ -67,7 +67,7 @@ if ($method === 'POST') {
     }
     
     // Verify email matches
-    if ($invite['invited_email'] !== $userEmail) {
+    if ($invite['email'] !== $userEmail) {
         http_response_code(403);
         echo json_encode(["success" => false, "message" => "This invitation was sent to a different email address"]);
         exit();

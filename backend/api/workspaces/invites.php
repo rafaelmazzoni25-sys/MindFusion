@@ -78,7 +78,7 @@ if ($method === 'POST') {
     // Check if there's already a pending invite
     $pendingCheck = $db->prepare("
         SELECT id FROM workspace_invites 
-        WHERE workspace_id = ? AND invited_email = ? AND status = 'pending'
+        WHERE workspace_id = ? AND email = ? AND status = 'pending'
     ");
     $pendingCheck->execute([$workspaceId, $invitedEmail]);
     if ($pendingCheck->fetch()) {
@@ -95,7 +95,7 @@ if ($method === 'POST') {
     
     // Create invitation
     $stmt = $db->prepare("
-        INSERT INTO workspace_invites (workspace_id, invited_email, invited_by_user_id, role, token, expires_at)
+        INSERT INTO workspace_invites (workspace_id, email, invited_by_user_id, role, token, expires_at)
         VALUES (?, ?, ?, ?, ?, ?)
     ");
     
@@ -147,7 +147,7 @@ elseif ($method === 'GET') {
         $stmt = $db->prepare("
             SELECT 
                 wi.id,
-                wi.invited_email,
+                wi.email as invited_email,
                 wi.role,
                 wi.status,
                 wi.created_at,
@@ -179,7 +179,10 @@ elseif ($method === 'GET') {
                 wi.id,
                 wi.token,
                 wi.workspace_id,
+                wi.email as invited_email,
+                wi.invited_by_user_id as invited_by,
                 wi.role,
+                wi.status,
                 wi.created_at,
                 wi.expires_at,
                 w.name as workspace_name,
@@ -187,7 +190,7 @@ elseif ($method === 'GET') {
             FROM workspace_invites wi
             JOIN workspaces w ON wi.workspace_id = w.id
             JOIN users u ON wi.invited_by_user_id = u.id
-            WHERE wi.invited_email = ? AND wi.status = 'pending' AND wi.expires_at > NOW()
+            WHERE wi.email = ? AND wi.status = 'pending' AND wi.expires_at > NOW()
             ORDER BY wi.created_at DESC
         ");
         $stmt->execute([$userEmail]);

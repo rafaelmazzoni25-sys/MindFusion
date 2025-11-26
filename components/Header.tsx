@@ -100,7 +100,11 @@ const UserMenu: React.FC<{
   return (
     <div className="relative" ref={menuRef}>
       <button onClick={() => setIsOpen(!isOpen)} className="flex items-center gap-2 p-1 rounded-full hover:bg-gray-200 transition-colors">
-        <img src={user.avatar} alt={user.username} className="w-8 h-8 rounded-full" />
+        <img
+          src={user.avatar?.startsWith('http') ? user.avatar : `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/${user.avatar}`}
+          alt={user.username}
+          className="w-8 h-8 rounded-full object-cover"
+        />
         <span className="font-semibold text-gray-700 hidden sm:block">{user.username}</span>
         <svg className={`w - 5 h - 5 text - gray - 500 transition - transform ${isOpen ? 'rotate-180' : ''} `} fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

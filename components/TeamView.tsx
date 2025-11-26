@@ -7,6 +7,15 @@ import { TeamMemberModal } from './TeamMemberModal';
 import { teamAPI, TeamInvite } from '../services/api';
 
 const UserAvatar: React.FC<{ user: User }> = ({ user }) => {
+    if (user.avatar) {
+        return (
+            <img
+                src={user.avatar.startsWith('http') ? user.avatar : `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/${user.avatar}`}
+                alt={user.name}
+                className="w-16 h-16 rounded-full object-cover mb-3"
+            />
+        );
+    }
     return (
         <div title={user.name} className={`w-16 h-16 rounded-full flex items-center justify-center font-bold text-white text-2xl mb-3`} style={{ backgroundColor: user.color || '#64748b' }}>
             {user.initials}

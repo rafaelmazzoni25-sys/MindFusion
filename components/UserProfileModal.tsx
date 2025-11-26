@@ -53,6 +53,12 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
     };
 
     const handleSave = async () => {
+        // Check if any fields were actually edited
+        if (Object.keys(editedProfile).length === 0) {
+            alert('Nenhuma alteração foi feita.');
+            return;
+        }
+
         setIsSaving(true);
         try {
             await onUpdateProfile(editedProfile);
@@ -73,16 +79,44 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
         }
     };
 
-    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const result = reader.result as string;
-                setAvatarPreview(result);
-                setEditedProfile(prev => ({ ...prev, avatar: result }));
-            };
-            reader.readAsDataURL(file);
+        if (!file) return;
+
+        // Validate file size (5MB max)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('A imagem deve ter no máximo 5MB');
+            return;
+        }
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            alert('Por favor, selecione uma imagem válida');
+            return;
+        }
+
+        // Show preview
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setAvatarPreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+
+        // Upload avatar immediately using API
+        try {
+            setIsSaving(true);
+            const { api } = await import('../services/api');
+            const avatarUrl = await api.profile.uploadAvatar(file);
+
+            // Update profile with avatar URL
+            setEditedProfile(prev => ({ ...prev, avatar: avatarUrl }));
+            alert('Avatar atualizado com sucesso!');
+        } catch (error) {
+            console.error('Avatar upload failed:', error);
+            alert('Falha ao fazer upload do avatar. Tente novamente.');
+            setAvatarPreview(null);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -153,7 +187,12 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                             >
                                 {avatarPreview || currentProfile.avatar ? (
                                     <img
-                                        src={avatarPreview || currentProfile.avatar}
+                                        src={
+                                            avatarPreview ||
+                                            (currentProfile.avatar?.startsWith('http')
+                                                ? currentProfile.avatar
+                                                : `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/${currentProfile.avatar}`)
+                                        }
                                         alt={currentProfile.name}
                                         className="w-full h-full rounded-full object-cover"
                                     />
