@@ -127,7 +127,7 @@ if ($method === 'POST') {
         // Update invitation status
         $updateInviteStmt = $db->prepare("
             UPDATE workspace_invites 
-            SET status = 'accepted', updated_at = CURRENT_TIMESTAMP 
+            SET status = 'accepted' 
             WHERE id = ?
         ");
         $updateInviteStmt->execute([$invite['id']]);
