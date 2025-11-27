@@ -54,7 +54,7 @@ if ($method === 'GET') {
     
     // Get workspace owner
     $ownerStmt = $db->prepare("
-        SELECT u.id, u.name, u.email, 'Owner' as role, w.created_at
+        SELECT u.id, u.name, u.email, u.avatar, 'Owner' as role, w.created_at
         FROM workspaces w
         JOIN users u ON w.user_id = u.id
         WHERE w.id = ?
@@ -62,10 +62,11 @@ if ($method === 'GET') {
     $ownerStmt->execute([$workspaceId]);
     $owner = $ownerStmt->fetch(PDO::FETCH_ASSOC);
     
-    // Get workspace members
+    // Get workspace members with user data
     $membersStmt = $db->prepare("
-        SELECT wu.user_id as id, wu.name, wu.role, wu.color, wu.initials, wu.created_at
+        SELECT wu.user_id as id, u.name, u.email, u.avatar, wu.role, wu.color, wu.initials, wu.created_at
         FROM workspace_users wu
+        JOIN users u ON wu.user_id = u.id
         WHERE wu.workspace_id = ?
         ORDER BY wu.created_at ASC
     ");

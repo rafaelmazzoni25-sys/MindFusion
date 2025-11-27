@@ -190,6 +190,18 @@ try {
                 }
             }
             
+            // Update assigned users if provided
+            if (isset($data->assignedUserIds)) {
+                $db->prepare("DELETE FROM task_assigned_users WHERE task_id = ?")->execute([$data->id]);
+                if (!empty($data->assignedUserIds)) {
+                    $userQuery = "INSERT INTO task_assigned_users (task_id, user_id) VALUES (?, ?)";
+                    $userStmt = $db->prepare($userQuery);
+                    foreach ($data->assignedUserIds as $userId) {
+                        $userStmt->execute([$data->id, $userId]);
+                    }
+                }
+            }
+            
             echo json_encode(['success' => true, 'message' => 'Task updated']);
             break;
             
