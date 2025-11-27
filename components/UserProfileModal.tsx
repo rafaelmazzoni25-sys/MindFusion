@@ -182,10 +182,10 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     <div className="flex flex-col items-center">
                         <div className="relative group">
                             <div
-                                className={`w-32 h-32 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-4xl font-bold ${isEditing ? 'cursor-pointer' : ''}`}
+                                className={`w-32 h-32 rounded-full flex items-center justify-center text-white text-4xl font-bold ${isEditing ? 'cursor-pointer' : ''} ${!(avatarPreview || (currentProfile.avatar && currentProfile.avatar.includes('/'))) ? 'bg-gradient-to-br from-indigo-500 to-purple-600' : ''}`}
                                 onClick={handleAvatarClick}
                             >
-                                {avatarPreview || currentProfile.avatar ? (
+                                {(avatarPreview || (currentProfile.avatar && currentProfile.avatar.includes('/'))) ? (
                                     <img
                                         src={
                                             avatarPreview ||

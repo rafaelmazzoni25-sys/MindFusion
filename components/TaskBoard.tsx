@@ -218,7 +218,6 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
         const day = d.getUTCDate().toString().padStart(2, '0');
         return `${year}-${month}-${day}`;
     });
-    const [checklist, setChecklist] = useState<ChecklistItem[]>(card.checklist || []);
     const [newChecklistItem, setNewChecklistItem] = useState('');
 
     const [activePopover, setActivePopover] = useState<string | null>(null);
@@ -266,14 +265,6 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
         document.addEventListener('keydown', handleEscape);
         return () => document.removeEventListener('keydown', handleEscape);
     }, [onClose]);
-
-    // Sync checklist state when card.checklist changes from external updates
-    // Important: Use JSON.stringify to deep compare arrays
-    useEffect(() => {
-        if (card.checklist) {
-            setChecklist([...card.checklist]);
-        }
-    }, [JSON.stringify(card.checklist)]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -331,29 +322,25 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
     };
 
     const handleChecklistChange = (itemId: string, newText: string) => {
-        const updated = checklist.map(item => item.id === itemId ? { ...item, text: newText } : item);
-        setChecklist(updated);
+        const updated = (card.checklist || []).map(item => item.id === itemId ? { ...item, text: newText } : item);
         handleUpdate({ checklist: updated });
     };
 
     const handleChecklistToggle = (itemId: string) => {
-        const updated = checklist.map(item => item.id === itemId ? { ...item, completed: !item.completed } : item);
-        setChecklist(updated);
+        const updated = (card.checklist || []).map(item => item.id === itemId ? { ...item, completed: !item.completed } : item);
         handleUpdate({ checklist: updated });
     };
 
     const addChecklistItem = () => {
         if (newChecklistItem.trim() === '') return;
         const newItem: ChecklistItem = { id: crypto.randomUUID(), text: newChecklistItem.trim(), completed: false };
-        const updated = [...checklist, newItem];
-        setChecklist(updated);
+        const updated = [...(card.checklist || []), newItem];
         handleUpdate({ checklist: updated });
         setNewChecklistItem('');
     };
 
     const deleteChecklistItem = (itemId: string) => {
-        const updated = checklist.filter(item => item.id !== itemId);
-        setChecklist(updated);
+        const updated = (card.checklist || []).filter(item => item.id !== itemId);
         handleUpdate({ checklist: updated });
     };
 
@@ -446,7 +433,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
         onDelete(card.id);
     };
 
-    const progress = checklist.length > 0 ? (checklist.filter(i => i.completed).length / checklist.length) * 100 : 0;
+    const progress = (card.checklist || []).length > 0 ? ((card.checklist || []).filter(i => i.completed).length / (card.checklist || []).length) * 100 : 0;
     const progressText = `${Math.round(progress)}%`;
 
     const availableDependencies = allTasks.filter(t => t.id !== card.id && !(card.dependencies || []).includes(t.id));
@@ -578,7 +565,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
                                         <div className="bg-indigo-600 h-2 rounded-full transition-all duration-300" style={{ width: `${progress}%` }}></div>
                                     </div>
                                     <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-2 -mr-2">
-                                        {checklist.map(item => (
+                                        {(card.checklist || []).map(item => (
                                             <div key={item.id} className="flex items-center gap-2 group bg-white p-1.5 rounded-md hover:bg-gray-100">
                                                 <input type="checkbox" checked={item.completed} onChange={() => handleChecklistToggle(item.id)} className="w-5 h-5 accent-indigo-500" />
                                                 <input
