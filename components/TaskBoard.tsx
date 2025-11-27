@@ -18,154 +18,154 @@ import { StarIcon } from './icons/StarIcon';
 
 // --- Contrast Helper ---
 function getContrastYIQ(hexcolor: string) {
-  if (hexcolor.startsWith('#')) {
-    hexcolor = hexcolor.slice(1);
-  }
-  const r = parseInt(hexcolor.substr(0, 2), 16);
-  const g = parseInt(hexcolor.substr(2, 2), 16);
-  const b = parseInt(hexcolor.substr(4, 2), 16);
-  const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-  return (yiq >= 128) ? 'text-black' : 'text-white';
+    if (hexcolor.startsWith('#')) {
+        hexcolor = hexcolor.slice(1);
+    }
+    const r = parseInt(hexcolor.substr(0, 2), 16);
+    const g = parseInt(hexcolor.substr(2, 2), 16);
+    const b = parseInt(hexcolor.substr(4, 2), 16);
+    const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+    return (yiq >= 128) ? 'text-black' : 'text-white';
 }
 
 // --- UserAvatar ---
 const UserAvatar: React.FC<{ user: User, size?: 'small' | 'medium', isResponsible?: boolean }> = ({ user, size = 'medium', isResponsible = false }) => {
-  const sizeClass = size === 'small' ? 'w-6 h-6 text-xs' : 'w-8 h-8 text-sm';
-  const responsibleClass = isResponsible ? 'ring-2 ring-yellow-400 ring-offset-1' : '';
+    const sizeClass = size === 'small' ? 'w-6 h-6 text-xs' : 'w-8 h-8 text-sm';
+    const responsibleClass = isResponsible ? 'ring-2 ring-yellow-400 ring-offset-1' : '';
 
-  return (
-    <div title={`${user.name}${isResponsible ? ' (Responsible)' : ''}`} className={`relative rounded-full flex items-center justify-center font-bold text-white ${sizeClass} ${responsibleClass}`} style={{backgroundColor: user.color || '#64748b'}}>
-      {user.initials}
-      {isResponsible && (
-          <div className="absolute -bottom-1 -right-1 bg-yellow-400 rounded-full p-px">
-              <StarIcon className="w-2.5 h-2.5 text-white" />
-          </div>
-      )}
-    </div>
-  );
+    return (
+        <div title={`${user.name}${isResponsible ? ' (Responsible)' : ''}`} className={`relative rounded-full flex items-center justify-center font-bold text-white ${sizeClass} ${responsibleClass}`} style={{ backgroundColor: user.color || '#64748b' }}>
+            {user.initials}
+            {isResponsible && (
+                <div className="absolute -bottom-1 -right-1 bg-yellow-400 rounded-full p-px">
+                    <StarIcon className="w-2.5 h-2.5 text-white" />
+                </div>
+            )}
+        </div>
+    );
 };
 
 // --- AssigneePopover ---
 interface AssigneePopoverProps {
-  allUsers: User[];
-  assignedUserIds: string[];
-  responsibleUserId?: string;
-  onToggleAssignee: (userId: string) => void;
-  onSetResponsible: (userId: string) => void;
-  onClose: () => void;
+    allUsers: User[];
+    assignedUserIds: string[];
+    responsibleUserId?: string;
+    onToggleAssignee: (userId: string) => void;
+    onSetResponsible: (userId: string) => void;
+    onClose: () => void;
 }
 const AssigneePopover: React.FC<AssigneePopoverProps> = ({ allUsers, assignedUserIds, responsibleUserId, onToggleAssignee, onSetResponsible, onClose }) => {
-  const popoverRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
-        onClose();
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [onClose]);
+    const popoverRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
+                onClose();
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [onClose]);
 
-  return (
-    <div ref={popoverRef} className="absolute z-20 w-64 bg-white rounded-md shadow-lg border p-3 right-0">
-       <h4 className="text-sm font-semibold text-gray-700 text-center mb-2">Assign users</h4>
-       <div className="space-y-1">
-        {allUsers.map(user => (
-          <div key={user.id} className="flex items-center gap-3 p-1.5 rounded hover:bg-gray-100">
-            <div onClick={() => onToggleAssignee(user.id)} className="flex items-center gap-3 cursor-pointer flex-grow">
-                <input type="checkbox" readOnly checked={assignedUserIds.includes(user.id)} className="w-4 h-4 accent-indigo-500 pointer-events-none" />
-                <UserAvatar user={user} />
-                <span className="text-sm font-medium">{user.name}</span>
+    return (
+        <div ref={popoverRef} className="absolute z-20 w-64 bg-white rounded-md shadow-lg border p-3 right-0">
+            <h4 className="text-sm font-semibold text-gray-700 text-center mb-2">Assign users</h4>
+            <div className="space-y-1">
+                {allUsers.map(user => (
+                    <div key={user.id} className="flex items-center gap-3 p-1.5 rounded hover:bg-gray-100">
+                        <div onClick={() => onToggleAssignee(user.id)} className="flex items-center gap-3 cursor-pointer flex-grow">
+                            <input type="checkbox" readOnly checked={assignedUserIds.includes(user.id)} className="w-4 h-4 accent-indigo-500 pointer-events-none" />
+                            <UserAvatar user={user} />
+                            <span className="text-sm font-medium">{user.name}</span>
+                        </div>
+                        <button
+                            onClick={() => onSetResponsible(user.id)}
+                            disabled={!assignedUserIds.includes(user.id)}
+                            title={responsibleUserId === user.id ? "Remove responsibility" : "Make responsible"}
+                            className="p-1 rounded-full disabled:opacity-20 disabled:cursor-not-allowed hover:bg-yellow-200"
+                        >
+                            <StarIcon className={`w-5 h-5 transition-colors ${responsibleUserId === user.id ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-400'}`} />
+                        </button>
+                    </div>
+                ))}
             </div>
-             <button 
-                onClick={() => onSetResponsible(user.id)} 
-                disabled={!assignedUserIds.includes(user.id)}
-                title={responsibleUserId === user.id ? "Remove responsibility" : "Make responsible"}
-                className="p-1 rounded-full disabled:opacity-20 disabled:cursor-not-allowed hover:bg-yellow-200"
-            >
-                <StarIcon className={`w-5 h-5 transition-colors ${responsibleUserId === user.id ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-400'}`} />
-            </button>
-          </div>
-        ))}
-       </div>
-    </div>
-  );
+        </div>
+    );
 };
 
 // --- LabelPopover ---
 interface LabelPopoverProps {
-  allLabels: Label[];
-  assignedLabels: Label[];
-  onToggleLabel: (label: Label) => void;
-  onCreateLabel: (text: string, color: string) => void;
-  onClose: () => void;
+    allLabels: Label[];
+    assignedLabels: Label[];
+    onToggleLabel: (label: Label) => void;
+    onCreateLabel: (text: string, color: string) => void;
+    onClose: () => void;
 }
 
 const LABEL_COLORS = [
-  '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16', '#22c55e', '#10b981', '#14b8a6', '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899'
+    '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16', '#22c55e', '#10b981', '#14b8a6', '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899'
 ];
 
 const LabelPopover: React.FC<LabelPopoverProps> = ({ allLabels, assignedLabels, onToggleLabel, onCreateLabel, onClose }) => {
-  const [newLabelText, setNewLabelText] = useState('');
-  const [selectedColor, setSelectedColor] = useState(LABEL_COLORS[0]);
-  const popoverRef = useRef<HTMLDivElement>(null);
+    const [newLabelText, setNewLabelText] = useState('');
+    const [selectedColor, setSelectedColor] = useState(LABEL_COLORS[0]);
+    const popoverRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
-        onClose();
-      }
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
+                onClose();
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [onClose]);
+
+    const handleCreate = () => {
+        if (newLabelText.trim()) {
+            onCreateLabel(newLabelText.trim(), selectedColor);
+            setNewLabelText('');
+        }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [onClose]);
 
-  const handleCreate = () => {
-    if (newLabelText.trim()) {
-      onCreateLabel(newLabelText.trim(), selectedColor);
-      setNewLabelText('');
-    }
-  };
+    const isLabelAssigned = (labelId: string) => assignedLabels.some(l => l.id === labelId);
 
-  const isLabelAssigned = (labelId: string) => assignedLabels.some(l => l.id === labelId);
-
-  return (
-    <div ref={popoverRef} className="absolute z-10 w-64 bg-white rounded-md shadow-lg border p-3 right-0">
-      <h4 className="text-sm font-semibold text-gray-700 text-center mb-2">Labels</h4>
-      <div className="space-y-1 mb-3">
-        {allLabels.map(label => (
-          <div key={label.id} className="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-gray-100" onClick={() => onToggleLabel(label)}>
-            <input type="checkbox" readOnly checked={isLabelAssigned(label.id)} className="w-4 h-4 accent-indigo-500 pointer-events-none"/>
-            <span style={{ backgroundColor: label.color }} className={`px-2 py-0.5 text-xs font-semibold rounded-full flex-grow text-center ${getContrastYIQ(label.color)}`}>
-              {label.text}
-            </span>
-          </div>
-        ))}
-      </div>
-      <hr className="my-2" />
-      <h5 className="text-sm font-semibold text-gray-700 mb-2">Create a new label</h5>
-      <input
-        type="text"
-        value={newLabelText}
-        onChange={(e) => setNewLabelText(e.target.value)}
-        placeholder="Label name"
-        className="w-full p-1.5 border rounded-md text-sm mb-2 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
-      />
-      <div className="grid grid-cols-8 gap-1 mb-2">
-        {LABEL_COLORS.map(color => (
-          <button
-            key={color}
-            style={{ backgroundColor: color }}
-            onClick={() => setSelectedColor(color)}
-            className={`w-6 h-6 rounded-full transition-transform hover:scale-110 ${selectedColor === color ? 'ring-2 ring-indigo-500 ring-offset-1' : ''}`}
-          />
-        ))}
-      </div>
-      <button onClick={handleCreate} className="w-full bg-indigo-500 text-white rounded-md py-1.5 text-sm font-semibold hover:bg-indigo-600">
-        Create
-      </button>
-    </div>
-  );
+    return (
+        <div ref={popoverRef} className="absolute z-10 w-64 bg-white rounded-md shadow-lg border p-3 right-0">
+            <h4 className="text-sm font-semibold text-gray-700 text-center mb-2">Labels</h4>
+            <div className="space-y-1 mb-3">
+                {allLabels.map(label => (
+                    <div key={label.id} className="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-gray-100" onClick={() => onToggleLabel(label)}>
+                        <input type="checkbox" readOnly checked={isLabelAssigned(label.id)} className="w-4 h-4 accent-indigo-500 pointer-events-none" />
+                        <span style={{ backgroundColor: label.color }} className={`px-2 py-0.5 text-xs font-semibold rounded-full flex-grow text-center ${getContrastYIQ(label.color)}`}>
+                            {label.text}
+                        </span>
+                    </div>
+                ))}
+            </div>
+            <hr className="my-2" />
+            <h5 className="text-sm font-semibold text-gray-700 mb-2">Create a new label</h5>
+            <input
+                type="text"
+                value={newLabelText}
+                onChange={(e) => setNewLabelText(e.target.value)}
+                placeholder="Label name"
+                className="w-full p-1.5 border rounded-md text-sm mb-2 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
+            />
+            <div className="grid grid-cols-8 gap-1 mb-2">
+                {LABEL_COLORS.map(color => (
+                    <button
+                        key={color}
+                        style={{ backgroundColor: color }}
+                        onClick={() => setSelectedColor(color)}
+                        className={`w-6 h-6 rounded-full transition-transform hover:scale-110 ${selectedColor === color ? 'ring-2 ring-indigo-500 ring-offset-1' : ''}`}
+                    />
+                ))}
+            </div>
+            <button onClick={handleCreate} className="w-full bg-indigo-500 text-white rounded-md py-1.5 text-sm font-semibold hover:bg-indigo-600">
+                Create
+            </button>
+        </div>
+    );
 };
 
 
@@ -189,7 +189,7 @@ const SidebarButton: React.FC<{
     className?: string
 }> = ({ icon, children, onClick, className = '' }) => {
     const commonClasses = `w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium bg-gray-100 hover:bg-gray-200 active:bg-gray-300 transition-colors text-gray-700 ${className}`;
-    
+
     return (
         <button onClick={onClick} className={commonClasses}>
             {icon}
@@ -220,7 +220,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
     });
     const [checklist, setChecklist] = useState<ChecklistItem[]>(card.checklist || []);
     const [newChecklistItem, setNewChecklistItem] = useState('');
-    
+
     const [activePopover, setActivePopover] = useState<string | null>(null);
 
     const modalRef = useRef<HTMLDivElement>(null);
@@ -240,7 +240,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
 
     const startDateForDisplay = useMemo(() => formatDateForDisplay(startDate), [startDate]);
     const dueDateForDisplay = useMemo(() => formatDateForDisplay(dueDate), [dueDate]);
-    
+
     const allLabels = useMemo(() => {
         const labelMap = new Map<string, Label>();
         columns.forEach(col => {
@@ -267,19 +267,27 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
         return () => document.removeEventListener('keydown', handleEscape);
     }, [onClose]);
 
+    // Sync checklist state when card.checklist changes from external updates
+    // Important: Use JSON.stringify to deep compare arrays
+    useEffect(() => {
+        if (card.checklist) {
+            setChecklist([...card.checklist]);
+        }
+    }, [JSON.stringify(card.checklist)]);
+
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-          if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
-            setActivePopover(null);
-          }
+            if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
+                setActivePopover(null);
+            }
         };
         if (activePopover) {
-          document.addEventListener('mousedown', handleClickOutside);
+            document.addEventListener('mousedown', handleClickOutside);
         }
         return () => {
-          document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('mousedown', handleClickOutside);
         };
-      }, [activePopover]);
+    }, [activePopover]);
 
     const handleUpdate = (updatedProperties: Partial<TaskCard>) => {
         onUpdate(card.id, columnId, updatedProperties);
@@ -296,7 +304,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
             e.target.value = '';
         }
     };
-    
+
     const handleAttachmentUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
@@ -327,13 +335,13 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
         setChecklist(updated);
         handleUpdate({ checklist: updated });
     };
-    
+
     const handleChecklistToggle = (itemId: string) => {
         const updated = checklist.map(item => item.id === itemId ? { ...item, completed: !item.completed } : item);
         setChecklist(updated);
         handleUpdate({ checklist: updated });
     };
-    
+
     const addChecklistItem = () => {
         if (newChecklistItem.trim() === '') return;
         const newItem: ChecklistItem = { id: crypto.randomUUID(), text: newChecklistItem.trim(), completed: false };
@@ -350,15 +358,15 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
     };
 
     const handleToggleLabel = (label: Label) => {
-      const newLabels = card.labels.some(l => l.id === label.id)
-        ? card.labels.filter(l => l.id !== label.id)
-        : [...card.labels, label];
-      handleUpdate({ labels: newLabels });
+        const newLabels = card.labels.some(l => l.id === label.id)
+            ? card.labels.filter(l => l.id !== label.id)
+            : [...card.labels, label];
+        handleUpdate({ labels: newLabels });
     };
 
     const handleCreateLabel = (text: string, color: string) => {
-      const newLabel: Label = { id: crypto.randomUUID(), text, color };
-      handleUpdate({ labels: [...card.labels, newLabel] });
+        const newLabel: Label = { id: crypto.randomUUID(), text, color };
+        handleUpdate({ labels: [...card.labels, newLabel] });
     };
 
     const handleToggleAssignee = (userId: string) => {
@@ -375,16 +383,16 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
 
         handleUpdate({ assignedUserIds: newUserIds, responsibleUserId: newResponsibleId });
     };
-    
+
     const handleSetResponsible = (userId: string) => {
         const newResponsibleId = card.responsibleUserId === userId ? undefined : userId;
-        
+
         const currentAssignedIds = card.assignedUserIds || [];
         const newAssignedIds = [...currentAssignedIds];
         if (newResponsibleId && !newAssignedIds.includes(newResponsibleId)) {
             newAssignedIds.push(newResponsibleId);
         }
-        
+
         handleUpdate({
             responsibleUserId: newResponsibleId,
             assignedUserIds: newAssignedIds,
@@ -397,7 +405,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
             handleUpdate({ dependencies: newDependencies });
         }
     };
-    
+
     const handleRemoveDependency = (dependencyId: string) => {
         const newDependencies = (card.dependencies || []).filter(id => id !== dependencyId);
         handleUpdate({ dependencies: newDependencies });
@@ -424,7 +432,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
             handleUpdate({ [field]: undefined });
         }
     };
-    
+
     const handleClearDate = (e: React.MouseEvent, field: 'startDate' | 'dueDate') => {
         e.preventDefault();
         e.stopPropagation();
@@ -432,12 +440,12 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
         setDate('');
         handleUpdate({ [field]: undefined });
     };
-    
+
 
     const handleDeleteCard = () => {
         onDelete(card.id);
     };
-    
+
     const progress = checklist.length > 0 ? (checklist.filter(i => i.completed).length / checklist.length) * 100 : 0;
     const progressText = `${Math.round(progress)}%`;
 
@@ -462,7 +470,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
                     {card.coverImageUrl && (
                         <div className="relative group">
                             <img src={card.coverImageUrl} alt={card.content} className="w-full h-48 object-cover" />
-                             <button 
+                            <button
                                 onClick={() => handleUpdate({ coverImageUrl: undefined })}
                                 className="absolute top-2 right-2 p-2 bg-black/50 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity"
                             >
@@ -474,7 +482,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
                         {/* Main Content */}
                         <div className="w-full lg:w-2/3 space-y-8">
                             {/* Metadata Section */}
-                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4">
                                 {assignedUsers.length > 0 && (
                                     <div>
                                         <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Assignees</h3>
@@ -490,7 +498,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
                                         <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Labels</h3>
                                         <div className="flex flex-wrap gap-1 items-center">
                                             {card.labels.map(label => (
-                                                <span key={label.id} style={{backgroundColor: label.color}} className={`px-2.5 py-1 text-xs font-semibold rounded-full ${getContrastYIQ(label.color)}`}>
+                                                <span key={label.id} style={{ backgroundColor: label.color }} className={`px-2.5 py-1 text-xs font-semibold rounded-full ${getContrastYIQ(label.color)}`}>
                                                     {label.text}
                                                 </span>
                                             ))}
@@ -515,7 +523,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
                                 </div>
                             </div>
                             {/* Attachments Section */}
-                             {(card.attachments && card.attachments.length > 0) && (
+                            {(card.attachments && card.attachments.length > 0) && (
                                 <div className="flex items-start gap-5">
                                     <PaperclipIcon className="w-6 h-6 text-gray-500 mt-1 flex-shrink-0" />
                                     <div className="w-full">
@@ -535,7 +543,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
                                 </div>
                             )}
 
-                             {/* Dependencies Section */}
+                            {/* Dependencies Section */}
                             {(card.dependencies && card.dependencies.length > 0) && (
                                 <div className="flex items-start gap-5">
                                     <DependencyIcon className="w-6 h-6 text-gray-500 mt-1 flex-shrink-0" />
@@ -572,14 +580,14 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
                                     <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-2 -mr-2">
                                         {checklist.map(item => (
                                             <div key={item.id} className="flex items-center gap-2 group bg-white p-1.5 rounded-md hover:bg-gray-100">
-                                                <input type="checkbox" checked={item.completed} onChange={() => handleChecklistToggle(item.id)} className="w-5 h-5 accent-indigo-500"/>
+                                                <input type="checkbox" checked={item.completed} onChange={() => handleChecklistToggle(item.id)} className="w-5 h-5 accent-indigo-500" />
                                                 <input
                                                     type="text"
                                                     value={item.text}
                                                     onChange={(e) => handleChecklistChange(item.id, e.target.value)}
                                                     className={`flex-grow p-1 rounded-md bg-transparent focus:bg-white focus:ring-1 focus:ring-indigo-400 ${item.completed ? 'line-through text-gray-400' : 'text-gray-700'}`}
                                                 />
-                                                <button onClick={() => deleteChecklistItem(item.id)} className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500"><TrashIcon className="w-4 h-4"/></button>
+                                                <button onClick={() => deleteChecklistItem(item.id)} className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500"><TrashIcon className="w-4 h-4" /></button>
                                             </div>
                                         ))}
                                     </div>
@@ -603,31 +611,31 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
                             <div>
                                 <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Add to card</h3>
                                 <div className="space-y-2">
-                                <div className="relative">
-                                        <SidebarButton icon={<UserPlusIcon className="w-5 h-5"/>} onClick={() => setActivePopover(p => p === 'assignees' ? null : 'assignees')}>Assignees</SidebarButton>
+                                    <div className="relative">
+                                        <SidebarButton icon={<UserPlusIcon className="w-5 h-5" />} onClick={() => setActivePopover(p => p === 'assignees' ? null : 'assignees')}>Assignees</SidebarButton>
                                         {activePopover === 'assignees' && (
                                             <AssigneePopover allUsers={users} assignedUserIds={card.assignedUserIds || []} responsibleUserId={card.responsibleUserId} onToggleAssignee={handleToggleAssignee} onSetResponsible={handleSetResponsible} onClose={() => setActivePopover(null)} />
                                         )}
                                     </div>
                                     <div className="relative">
-                                        <SidebarButton icon={<TagIcon className="w-5 h-5"/>} onClick={() => setActivePopover(p => p === 'labels' ? null : 'labels')}>Labels</SidebarButton>
+                                        <SidebarButton icon={<TagIcon className="w-5 h-5" />} onClick={() => setActivePopover(p => p === 'labels' ? null : 'labels')}>Labels</SidebarButton>
                                         {activePopover === 'labels' && (
                                             <LabelPopover allLabels={allLabels} assignedLabels={card.labels} onToggleLabel={handleToggleLabel} onCreateLabel={handleCreateLabel} onClose={() => setActivePopover(null)} />
                                         )}
                                     </div>
                                     <label className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium bg-gray-100 hover:bg-gray-200 active:bg-gray-300 transition-colors text-gray-700 cursor-pointer">
-                                        <ImageIcon className="w-5 h-5"/>
+                                        <ImageIcon className="w-5 h-5" />
                                         Cover
                                         <input type="file" accept="image/*" className="hidden" onChange={handleCoverImageUpload} />
                                     </label>
                                     <label className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium bg-gray-100 hover:bg-gray-200 active:bg-gray-300 transition-colors text-gray-700 cursor-pointer">
-                                        <PaperclipIcon className="w-5 h-5"/>
+                                        <PaperclipIcon className="w-5 h-5" />
                                         Attachment
                                         <input type="file" className="hidden" onChange={handleAttachmentUpload} />
                                     </label>
                                     <div className="relative group">
                                         <div className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium bg-gray-100 group-hover:bg-gray-200 transition-colors text-gray-700">
-                                            <ClockIcon className="w-5 h-5"/>
+                                            <ClockIcon className="w-5 h-5" />
                                             <div className="flex items-center justify-between w-full">
                                                 <span>Start Date</span>
                                                 {startDateForDisplay && (
@@ -635,12 +643,12 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
                                                         <span className="text-xs font-semibold px-2 py-0.5 rounded bg-gray-200 text-gray-700">
                                                             {startDateForDisplay}
                                                         </span>
-                                                        <button 
+                                                        <button
                                                             onClick={(e) => handleClearDate(e, 'startDate')}
                                                             className="relative z-20 p-0.5 rounded-full text-gray-400 opacity-0 group-hover:opacity-100 hover:bg-gray-400 hover:text-white transition-all"
                                                             title="Remove start date"
                                                         >
-                                                            <XIcon className="w-3 h-3"/>
+                                                            <XIcon className="w-3 h-3" />
                                                         </button>
                                                     </div>
                                                 )}
@@ -657,7 +665,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
                                     </div>
                                     <div className="relative group">
                                         <div className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium bg-gray-100 group-hover:bg-gray-200 transition-colors text-gray-700">
-                                            <ClockIcon className="w-5 h-5"/>
+                                            <ClockIcon className="w-5 h-5" />
                                             <div className="flex items-center justify-between w-full">
                                                 <span>Due Date</span>
                                                 {dueDateForDisplay && (
@@ -665,12 +673,12 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
                                                         <span className="text-xs font-semibold px-2 py-0.5 rounded bg-gray-200 text-gray-700">
                                                             {dueDateForDisplay}
                                                         </span>
-                                                        <button 
+                                                        <button
                                                             onClick={(e) => handleClearDate(e, 'dueDate')}
                                                             className="relative z-20 p-0.5 rounded-full text-gray-400 opacity-0 group-hover:opacity-100 hover:bg-gray-400 hover:text-white transition-all"
                                                             title="Remove due date"
                                                         >
-                                                            <XIcon className="w-3 h-3"/>
+                                                            <XIcon className="w-3 h-3" />
                                                         </button>
                                                     </div>
                                                 )}
@@ -686,7 +694,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
                                         />
                                     </div>
                                     <div className="relative">
-                                        <SidebarButton icon={<FlagIcon className="w-5 h-5"/>} onClick={() => setActivePopover(p => p === 'priority' ? null : 'priority')}>Priority</SidebarButton>
+                                        <SidebarButton icon={<FlagIcon className="w-5 h-5" />} onClick={() => setActivePopover(p => p === 'priority' ? null : 'priority')}>Priority</SidebarButton>
                                         {activePopover === 'priority' && (
                                             <div className="absolute z-10 right-0 bg-white w-full rounded-md shadow-lg border p-2 space-y-1">
                                                 {(Object.values(TaskPriority) as TaskPriority[]).map(p => (
@@ -696,13 +704,13 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
                                         )}
                                     </div>
                                     <div className="relative">
-                                        <SidebarButton icon={<DependencyIcon className="w-5 h-5"/>} onClick={() => setActivePopover(p => p === 'dependencies' ? null : 'dependencies')}>Dependencies</SidebarButton>
+                                        <SidebarButton icon={<DependencyIcon className="w-5 h-5" />} onClick={() => setActivePopover(p => p === 'dependencies' ? null : 'dependencies')}>Dependencies</SidebarButton>
                                         {activePopover === 'dependencies' && (
                                             <div className="absolute z-10 right-0 bg-white w-full rounded-md shadow-lg border p-2">
                                                 <select
-                                                  onChange={(e) => handleAddDependency(e.target.value)}
-                                                  className="w-full p-2 border rounded-md"
-                                                  value=""
+                                                    onChange={(e) => handleAddDependency(e.target.value)}
+                                                    className="w-full p-2 border rounded-md"
+                                                    value=""
                                                 >
                                                     <option value="" disabled>Add a dependency...</option>
                                                     {availableDependencies.map(t => (
@@ -718,16 +726,16 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ card, column
                                 <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Actions</h3>
                                 <div className="space-y-2">
                                     <div className="relative">
-                                        <SidebarButton icon={<ArrowRightIcon className="w-5 h-5"/>} onClick={() => setActivePopover(p => p === 'move' ? null : 'move')}>Move</SidebarButton>
+                                        <SidebarButton icon={<ArrowRightIcon className="w-5 h-5" />} onClick={() => setActivePopover(p => p === 'move' ? null : 'move')}>Move</SidebarButton>
                                         {activePopover === 'move' && (
                                             <div className="absolute z-10 right-0 bg-white w-full rounded-md shadow-lg border p-2 space-y-1">
                                                 {columns.map(col => (
-                                                    <button key={col.id} onClick={() => {handleMoveCard(col.id); setActivePopover(null);}} className="w-full text-left px-3 py-1.5 rounded hover:bg-gray-100 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled={col.id === columnId}>{col.title}</button>
+                                                    <button key={col.id} onClick={() => { handleMoveCard(col.id); setActivePopover(null); }} className="w-full text-left px-3 py-1.5 rounded hover:bg-gray-100 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled={col.id === columnId}>{col.title}</button>
                                                 ))}
                                             </div>
                                         )}
                                     </div>
-                                    <SidebarButton icon={<TrashIcon className="w-5 h-5"/>} onClick={handleDeleteCard} className="!bg-red-50 hover:!bg-red-100 !text-red-700">Delete</SidebarButton>
+                                    <SidebarButton icon={<TrashIcon className="w-5 h-5" />} onClick={handleDeleteCard} className="!bg-red-50 hover:!bg-red-100 !text-red-700">Delete</SidebarButton>
                                 </div>
                             </div>
                         </div>
@@ -752,7 +760,7 @@ interface TaskCardProps {
 
 const TaskCardComponent: React.FC<TaskCardProps> = ({ card, columnId, users, isHighlighted, isJustUpdated, isDeleting, onOpenDetails, onDragStart }) => {
     const cardRef = useRef<HTMLDivElement>(null);
-    
+
     useEffect(() => {
         if (isHighlighted && cardRef.current) {
             cardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -770,10 +778,10 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({ card, columnId, users, isH
             .filter(Boolean) as User[];
         return { responsibleUser: responsible, otherAssignedUsers: others };
     }, [card.assignedUserIds, card.responsibleUserId, users]);
-    
+
     const getDueDateStatus = () => {
         if (!card.dueDate) return { className: '', text: '' };
-        
+
         const isComplete = totalItems > 0 && completedItems === totalItems;
         if (isComplete) return { className: 'bg-green-100 text-green-800', text: 'Complete' };
 
@@ -818,7 +826,7 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({ card, columnId, users, isH
                 {card.labels && card.labels.length > 0 && (
                     <div className="flex flex-wrap gap-1 mb-2">
                         {card.labels.map(label => (
-                            <span key={label.id} style={{backgroundColor: label.color}} className={`px-2 py-0.5 text-xs font-bold rounded-full ${getContrastYIQ(label.color)}`}>
+                            <span key={label.id} style={{ backgroundColor: label.color }} className={`px-2 py-0.5 text-xs font-bold rounded-full ${getContrastYIQ(label.color)}`}>
                                 {label.text}
                             </span>
                         ))}
@@ -835,25 +843,25 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({ card, columnId, users, isH
                         {card.description && <span title="Has description"><DescriptionIcon className="w-4 h-4" /></span>}
                         {card.attachments && card.attachments.length > 0 && (
                             <div className="flex items-center gap-1" title={`${card.attachments.length} attachment(s)`}>
-                                <PaperclipIcon className="w-4 h-4"/>
+                                <PaperclipIcon className="w-4 h-4" />
                                 <span className="text-xs font-semibold">{card.attachments.length}</span>
                             </div>
                         )}
                         {card.dependencies && card.dependencies.length > 0 && (
                             <div className="flex items-center gap-1" title={`${card.dependencies.length} dependenc${card.dependencies.length > 1 ? 'ies' : 'y'}`}>
-                                <DependencyIcon className="w-4 h-4"/>
+                                <DependencyIcon className="w-4 h-4" />
                                 <span className="text-xs font-semibold">{card.dependencies.length}</span>
                             </div>
                         )}
                         {card.dueDate && (
                             <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-semibold ${dueDateStatus.className}`}>
-                                <ClockIcon className="w-3 h-3"/> 
+                                <ClockIcon className="w-3 h-3" />
                                 <span>{dueDateStatus.text}</span>
                             </div>
                         )}
                         {totalItems > 0 && (
                             <div className={`flex items-center gap-1 ${completedItems === totalItems ? 'text-green-600' : ''}`} title={`${completedItems} of ${totalItems} complete`}>
-                                <ChecklistIcon className="w-4 h-4"/> 
+                                <ChecklistIcon className="w-4 h-4" />
                                 <span className="text-xs font-semibold">{completedItems}/{totalItems}</span>
                             </div>
                         )}
@@ -861,7 +869,7 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({ card, columnId, users, isH
                     {(responsibleUser || otherAssignedUsers.length > 0) && (
                         <div className="flex -space-x-2">
                             {responsibleUser && <UserAvatar key={responsibleUser.id} user={responsibleUser} size="small" isResponsible />}
-                            {otherAssignedUsers.map(user => <UserAvatar key={user.id} user={user} size="small"/>)}
+                            {otherAssignedUsers.map(user => <UserAvatar key={user.id} user={user} size="small" />)}
                         </div>
                     )}
                 </div>
@@ -879,7 +887,7 @@ interface ColumnProps {
     justUpdatedCardId: string | null;
     deletingCardId: string | null;
     onUpdateTitle: (columnId: string, newTitle: string) => void;
-    onDelete: (columnId:string) => void;
+    onDelete: (columnId: string) => void;
     onAddCard: (columnId: string, content: string) => void;
     onOpenDetails: (card: TaskCard, columnId: string) => void;
     onCardDragStart: (e: React.DragEvent, cardId: string, fromColumnId: string) => void;
@@ -894,21 +902,21 @@ const ColumnComponent: React.FC<ColumnProps> = ({ column, columnIndex, users, hi
     const [newCardContent, setNewCardContent] = useState('');
     const [isAddingCard, setIsAddingCard] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
-    
+
     const handleAddCard = () => {
-        if(newCardContent.trim()) {
+        if (newCardContent.trim()) {
             onAddCard(column.id, newCardContent.trim());
             setNewCardContent('');
             setIsAddingCard(false);
         }
     };
-    
+
     const handleDelete = () => {
         onDelete(column.id);
     };
 
     return (
-        <div 
+        <div
             draggable
             onDragStart={(e) => onColumnDragStart(e, columnIndex)}
             onDrop={(e) => {
@@ -928,8 +936,8 @@ const ColumnComponent: React.FC<ColumnProps> = ({ column, columnIndex, users, hi
             <div className="flex justify-between items-center px-4 pt-3 pb-1 cursor-grab">
                 <div className="flex items-center gap-2">
                     {isEditingTitle ? (
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             onBlur={() => { onUpdateTitle(column.id, title); setIsEditingTitle(false); }}
@@ -938,20 +946,20 @@ const ColumnComponent: React.FC<ColumnProps> = ({ column, columnIndex, users, hi
                             autoFocus
                         />
                     ) : (
-                         <h2 onDoubleClick={() => setIsEditingTitle(true)} className="font-semibold text-lg text-slate-800 p-1 flex items-center">
-                          {column.title}
-                          <span className="ml-2 text-sm font-medium text-gray-500 bg-gray-200 rounded-full px-2 py-0.5">{column.cards.length}</span>
+                        <h2 onDoubleClick={() => setIsEditingTitle(true)} className="font-semibold text-lg text-slate-800 p-1 flex items-center">
+                            {column.title}
+                            <span className="ml-2 text-sm font-medium text-gray-500 bg-gray-200 rounded-full px-2 py-0.5">{column.cards.length}</span>
                         </h2>
                     )}
                 </div>
-                <button onClick={handleDelete} title="Delete column" aria-label="Delete column" className="p-1.5 rounded-full text-gray-400 hover:bg-gray-200 hover:text-red-500 transition-colors"><TrashIcon className="w-5 h-5"/></button>
+                <button onClick={handleDelete} title="Delete column" aria-label="Delete column" className="p-1.5 rounded-full text-gray-400 hover:bg-gray-200 hover:text-red-500 transition-colors"><TrashIcon className="w-5 h-5" /></button>
             </div>
-            <div 
+            <div
                 className={`flex-grow overflow-y-auto space-y-3 p-3 transition-colors custom-scrollbar m-1 rounded-lg ${isDragOver ? 'bg-indigo-100 border-2 border-dashed border-indigo-400' : 'border-2 border-transparent'}`}
                 onDrop={(e) => {
-                  e.stopPropagation();
-                  onCardDrop(e, column.id);
-                  setIsDragOver(false);
+                    e.stopPropagation();
+                    onCardDrop(e, column.id);
+                    setIsDragOver(false);
                 }}
                 onDragOver={(e) => {
                     e.preventDefault();
@@ -973,9 +981,9 @@ const ColumnComponent: React.FC<ColumnProps> = ({ column, columnIndex, users, hi
                     />
                 ))}
             </div>
-             {isAddingCard ? (
+            {isAddingCard ? (
                 <div className="p-3">
-                    <textarea 
+                    <textarea
                         value={newCardContent}
                         onChange={(e) => setNewCardContent(e.target.value)}
                         placeholder="Enter a title for this card..."
@@ -984,12 +992,12 @@ const ColumnComponent: React.FC<ColumnProps> = ({ column, columnIndex, users, hi
                     />
                     <div className="flex items-center gap-2 mt-2">
                         <button onClick={handleAddCard} className="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition-colors">Add Card</button>
-                        <button onClick={() => setIsAddingCard(false)} className="p-2 rounded-full hover:bg-gray-200"><XIcon className="w-5 h-5 text-gray-600"/></button>
+                        <button onClick={() => setIsAddingCard(false)} className="p-2 rounded-full hover:bg-gray-200"><XIcon className="w-5 h-5 text-gray-600" /></button>
                     </div>
                 </div>
             ) : (
                 <button onClick={() => setIsAddingCard(true)} className="flex items-center justify-center gap-2 w-full p-3 rounded-b-xl text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors font-medium">
-                    <PlusIcon className="w-5 h-5"/> Add a card
+                    <PlusIcon className="w-5 h-5" /> Add a card
                 </button>
             )}
         </div>
@@ -1046,9 +1054,9 @@ const TaskBoard: React.FC<TaskBoardProps> = ({ columns, users, allTasks, moveTas
         board.addEventListener('wheel', handleWheel);
         return () => board.removeEventListener('wheel', handleWheel);
     }, []);
-    
+
     const handleAddColumn = () => {
-        if(newColumnTitle.trim()) {
+        if (newColumnTitle.trim()) {
             addColumn(newColumnTitle.trim());
             setNewColumnTitle('');
             setIsAddingColumn(false);
@@ -1056,22 +1064,22 @@ const TaskBoard: React.FC<TaskBoardProps> = ({ columns, users, allTasks, moveTas
     };
 
     const handleCardDragStart = (e: React.DragEvent, cardId: string, fromColumnId: string) => {
-      e.dataTransfer.setData('application/card', JSON.stringify({ cardId, fromColumnId }));
-      e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('application/card', JSON.stringify({ cardId, fromColumnId }));
+        e.dataTransfer.effectAllowed = 'move';
     };
 
     const handleCardDrop = (e: React.DragEvent, toColumnId: string) => {
-      const data = e.dataTransfer.getData('application/card');
-      if (data) {
-        const { cardId, fromColumnId } = JSON.parse(data);
-        
-        const toColumn = columns.find(c => c.id === toColumnId);
-        const destinationIndex = toColumn?.cards.length || 0;
+        const data = e.dataTransfer.getData('application/card');
+        if (data) {
+            const { cardId, fromColumnId } = JSON.parse(data);
 
-        if (cardId && fromColumnId && toColumnId) {
-            moveTaskCard(cardId, fromColumnId, toColumnId, destinationIndex);
+            const toColumn = columns.find(c => c.id === toColumnId);
+            const destinationIndex = toColumn?.cards.length || 0;
+
+            if (cardId && fromColumnId && toColumnId) {
+                moveTaskCard(cardId, fromColumnId, toColumnId, destinationIndex);
+            }
         }
-      }
     };
 
     const handleColumnDragStart = (e: React.DragEvent, columnIndex: number) => {
@@ -1097,9 +1105,9 @@ const TaskBoard: React.FC<TaskBoardProps> = ({ columns, users, allTasks, moveTas
     return (
         <div ref={boardRef} className="w-full h-full p-4 flex gap-4 overflow-x-auto bg-gray-50 custom-scrollbar">
             {columns.map((column, index) => (
-                <ColumnComponent 
-                    key={column.id} 
-                    column={column} 
+                <ColumnComponent
+                    key={column.id}
+                    column={column}
                     columnIndex={index}
                     users={users}
                     highlightedTaskId={highlightedTaskId}
@@ -1129,12 +1137,12 @@ const TaskBoard: React.FC<TaskBoardProps> = ({ columns, users, allTasks, moveTas
                         />
                         <div className="flex items-center gap-2 mt-2">
                             <button onClick={handleAddColumn} className="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition-colors">Add Column</button>
-                            <button onClick={() => setIsAddingColumn(false)} className="p-2 rounded-full hover:bg-gray-300/50"><XIcon className="w-5 h-5 text-gray-600"/></button>
+                            <button onClick={() => setIsAddingColumn(false)} className="p-2 rounded-full hover:bg-gray-300/50"><XIcon className="w-5 h-5 text-gray-600" /></button>
                         </div>
                     </div>
                 ) : (
                     <button onClick={() => setIsAddingColumn(true)} className="flex items-center gap-2 w-full h-12 px-4 rounded-xl text-slate-600 font-medium bg-gray-200/50 hover:bg-gray-200 hover:text-slate-800 transition-colors">
-                        <PlusIcon className="w-5 h-5"/> Add another column
+                        <PlusIcon className="w-5 h-5" /> Add another column
                     </button>
                 )}
             </div>
